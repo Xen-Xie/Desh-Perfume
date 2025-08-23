@@ -1,4 +1,5 @@
 import React from 'react'
+import Button from '../reuse/Button'
 
 function Home() {
   return (
