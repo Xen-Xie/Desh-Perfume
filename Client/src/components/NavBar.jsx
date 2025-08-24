@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 import { motion } from "framer-motion";
+import { useTheme } from "../context/useTheme";
 
 function NavBar() {
   const navItems = [
@@ -50,13 +51,7 @@ function NavBar() {
   const [cartCount, setCartCount] = useState(0);
 
   // Dark Mode State
-  const [darkMode, setDarkMode] = useState(() => {
-    return localStorage.getItem("theme") === "dark";
-  });
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", darkMode);
-    localStorage.setItem("theme", darkMode ? "dark" : "light");
-  }, [darkMode]);
+const { darkMode, setDarkMode } = useTheme();
   const [mounted, setMounted] = useState(false);
 
 useEffect(() => {
