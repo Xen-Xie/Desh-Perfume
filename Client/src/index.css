@@ -20,3 +20,13 @@
   --color-accenttwo: #6C4A73;
   --color-cardbg: #1B263B;
 }
+
+  .input{
+    @apply w-full border-2 border-accentone/30 rounded-xl px-5 py-2
+    focus:outline-none focus:ring-2 focus:ring-accentone/70
+    font-secondary text-base font-semibold
+    placeholder:text-primarytext text-primarytext/80
+    invalid:border-accentone invalid:placeholder:text-accentone invalid:text-accentone
+    min-w-0 max-w-full
+    transition-all duration-300 ease-in-out
+  }
