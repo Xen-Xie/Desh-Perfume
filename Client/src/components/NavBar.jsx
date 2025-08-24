@@ -21,7 +21,7 @@ function NavBar() {
         { name: "Brand Hair and Skin Care", path: "/brandhairandskincare" },
       ],
     },
-    { name: "Account", path: "/contact-us" },
+    { name: "Account", path: "/account" },
   ];
 
   const [open, setOpen] = useState(false);
@@ -57,6 +57,11 @@ function NavBar() {
     document.documentElement.classList.toggle("dark", darkMode);
     localStorage.setItem("theme", darkMode ? "dark" : "light");
   }, [darkMode]);
+  const [mounted, setMounted] = useState(false);
+
+useEffect(() => {
+  setMounted(true);
+}, []);
 
   return (
     <>
@@ -157,8 +162,8 @@ function NavBar() {
               {/* Icon (Sun / Moon) */}
               <motion.i
                 key={darkMode ? "moon" : "sun"}
-                initial={{ y: darkMode ? -40 : 40, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
+                initial={mounted ? { y: darkMode ? -40 : 40, opacity: 0 } : {}}
+                animate={mounted ? { y: 0, opacity: 1 } : {}}
                 exit={{ y: darkMode ? 40 : -40, opacity: 0 }}
                 transition={{ duration: 1, ease: "easeInOut" }}
                 className="absolute inset-0 flex items-center justify-center text-xl"
