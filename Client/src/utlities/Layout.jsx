@@ -1,6 +1,7 @@
 import React from "react";
 import NavBar from "../components/NavBar";
 import { Outlet } from "react-router";
+import Footer from "../components/Footer";
 
 function Layout() {
   return (
@@ -9,6 +10,7 @@ function Layout() {
         <NavBar />
         <main className='pt-[96px] flex-grow relative z-30'>
           <Outlet />
+          <Footer />
         </main>
       </div>
     </>
