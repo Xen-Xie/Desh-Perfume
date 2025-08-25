@@ -5,6 +5,7 @@ import { DB } from './src/config/db.js';
 import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
 import userRoutes from './src/routes/userRoutes.js';
+import ProductRoutes from './src/routes/productRoutes.js'
 
 
 // Configurations
@@ -23,6 +24,7 @@ DB(url);
 
 // Routes
 app.use('/api/user',userRoutes)
+app.use('/api/product/create',ProductRoutes)
 
 // Server Port
 const PORT = process.env.PORT || 5000;
