@@ -2,7 +2,14 @@ import express from "express";
 import multer from "multer";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import cloudinary from "../config/cloudinary.js";
-import {createProduct} from "../controllers/productController.js";
+import {
+  createProduct,
+  getProducts,
+  getProductById,
+  updateProduct,
+  deleteProduct,
+  addRating,
+} from "../controllers/productController.js";
 
 const router = express.Router();
 
@@ -19,5 +26,9 @@ const upload = multer({ storage });
 
 // Routes
 router.post("/", upload.single("image"), createProduct);
-
+router.get("/", getProducts);
+router.get("/:id", getProductById);
+router.put("/:id", upload.single("image"), updateProduct);
+router.delete("/:id", deleteProduct);
+router.post("/:id/rating", addRating);
 export default router;
