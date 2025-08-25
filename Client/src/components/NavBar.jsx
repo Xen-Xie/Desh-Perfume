@@ -6,6 +6,7 @@ import { useTheme } from "../context/useTheme";
 import { useAuth } from "../auth/useAuth";
 
 function NavBar() {
+  const { user, logout } = useAuth();
   const navItems = [
     { name: "Home", path: "/" },
     {
@@ -24,8 +25,11 @@ function NavBar() {
       ],
     },
     { name: "Account", path: "/account" },
+       ...(user?.role === "admin"
+     ? [{ name: "Admin Panel", path: "/adminpanel" }]
+     : []),
   ];
-  const { user, logout } = useAuth();
+
 
   const [open, setOpen] = useState(false);
   // Submenu state
