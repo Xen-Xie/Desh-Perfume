@@ -4,7 +4,7 @@ import Layout from "./utlities/Layout";
 import Home from "./pages/Home";
 import Store from "./pages/Store";
 import Account from "./pages/Account";
-
+import Login from "./components/Login";
 import Error from "./pages/Error";
 
 function App() {
@@ -15,6 +15,7 @@ function App() {
           <Route index element={<Home />} />
           <Route path="/store" element={<Store />} />
           <Route path="/account" element={<Account />} />
+          <Route path="/login" element={<Login />} />
           <Route path="*" element={<Error />} />
         </Route>
       </Routes>

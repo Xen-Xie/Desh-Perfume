@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import { useTheme } from "../context/useTheme";
+import { useAuth } from "../auth/useAuth";
 
 function NavBar() {
   const navItems = [
@@ -24,6 +25,7 @@ function NavBar() {
     },
     { name: "Account", path: "/account" },
   ];
+  const { user, logout } = useAuth();
 
   const [open, setOpen] = useState(false);
   // Submenu state
@@ -63,7 +65,17 @@ useEffect(() => {
       <div className="font-secondary">
         <nav className="fixed top-0 left-0 w-full z-50 flex justify-between items-center bg-transparent shadow-lg mx-auto px-4 py-2 md:px-12 xl:px-20 dark:shadow-lg backdrop-blur-md">
           {/* Logo Section */}
-          <div>
+          <div className="flex items-center gap-4">
+            {user && (
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={logout}
+              title="Logout"
+              className="text-xl hidden sm:flex cursor-pointer"
+            >
+              <i className="fa-solid fa-right-from-bracket hover:text-melty dark:hover:text-primary text-[27px] transition-colors duration-300" />
+            </motion.button>
+          )}
             <a href="/home">
               {darkMode ? (
                 <img src="/DashLogoD.png" alt="" className="w-15" />
