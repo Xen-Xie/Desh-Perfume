@@ -28,3 +28,14 @@ export const createProduct = async (req,res) => {
     res.status(400).json({message:"Error Creating Product"},err)
   }
 };
+
+// Get All Products
+
+export const getProducts = async (req,res) => {
+  try {
+    const products = await Product.find().populate('category');
+    res.json(products);
+  } catch(err) {
+    res.status(500).json({ message: "Error fetching products",err});
+  }
+}
