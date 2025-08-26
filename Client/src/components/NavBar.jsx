@@ -26,7 +26,7 @@ function NavBar() {
     },
     { name: "Account", path: "/account" },
        ...(user?.role === "admin"
-     ? [{ name: "Admin Panel", path: "/adminpanel" }]
+     ? [{ name: "Product Panel", path: "/productpanel" }]
      : []),
   ];
 

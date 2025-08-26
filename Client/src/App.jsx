@@ -6,7 +6,7 @@ import Store from "./pages/Store";
 import Account from "./pages/Account";
 import Login from "./components/Login";
 import Error from "./pages/Error";
-import AdminPanel from "./pages/AdminPanel";
+import ProductPanel from "./pages/ProductPanel";
 import AdminRoute from "./routes/AdminRoute";
 
 function App() {
@@ -19,10 +19,10 @@ function App() {
           <Route path="/account" element={<Account />} />
           <Route path="/login" element={<Login />} />
           <Route
-            path="/adminpanel"
+            path="/productpanel"
             element={
               <AdminRoute>
-                <AdminPanel />
+                <ProductPanel />
               </AdminRoute>
             }
           />
