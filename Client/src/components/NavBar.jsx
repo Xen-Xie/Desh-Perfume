@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import { useTheme } from "../context/useTheme";
 import { useAuth } from "../auth/useAuth";
+import { useCart } from "../context/UseCart";
 
 function NavBar() {
   const { user, logout } = useAuth();
@@ -25,11 +26,10 @@ function NavBar() {
       ],
     },
     { name: "Account", path: "/account" },
-       ...(user?.role === "admin"
-     ? [{ name: "Product Panel", path: "/productpanel" }]
-     : []),
+    ...(user?.role === "admin"
+      ? [{ name: "Product Panel", path: "/productpanel" }]
+      : []),
   ];
-
 
   const [open, setOpen] = useState(false);
   // Submenu state
@@ -54,15 +54,19 @@ function NavBar() {
     }
   };
   // Cart State
-  const [cartCount, setCartCount] = useState(0);
+  const { totalCount, clearCart } = useCart();
+  const handleLogout = () => {
+    logout();
+    clearCart();
+  };
 
   // Dark Mode State
-const { darkMode, setDarkMode } = useTheme();
+  const { darkMode, setDarkMode } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-useEffect(() => {
-  setMounted(true);
-}, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <>
@@ -71,15 +75,15 @@ useEffect(() => {
           {/* Logo Section */}
           <div className="flex items-center gap-4">
             {user && (
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={logout}
-              title="Logout"
-              className="text-xl hidden sm:flex cursor-pointer"
-            >
-              <i className="fa-solid fa-right-from-bracket hover:text-melty dark:hover:text-primary text-[27px] transition-colors duration-300" />
-            </motion.button>
-          )}
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={handleLogout}
+                title="Logout"
+                className="text-xl hidden sm:flex cursor-pointer"
+              >
+                <i className="fa-solid fa-right-from-bracket hover:text-melty dark:hover:text-primary text-[27px] transition-colors duration-300" />
+              </motion.button>
+            )}
             <a href="/home">
               {darkMode ? (
                 <img src="/DashLogoD.png" alt="" className="w-15" />
@@ -142,9 +146,9 @@ useEffect(() => {
             <motion.button className="relative">
               <i className="fa-solid fa-cart-shopping text-[25px] mt-[5px] cursor-pointer text-primarytext"></i>
 
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-2 bg-red-600 text-secondarytext text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                  {cartCount}
+              {totalCount > 0 && (
+                <span className="absolute -top-1 -right-2 bg-danger/85 text-primarybg dark:text-primarytext text-[11px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                  {totalCount}
                 </span>
               )}
             </motion.button>
@@ -248,6 +252,18 @@ useEffect(() => {
                 )}
               </li>
             ))}
+            <li>
+              {user && (
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleLogout}
+                  title="Logout"
+                  className="text-xl"
+                >
+                  <i className="fa-solid fa-right-from-bracket hover:text-melty dark:hover:text-primary text-[27px] transition-colors duration-300" />
+                </motion.button>
+              )}
+            </li>
           </ul>
         </div>
       </div>

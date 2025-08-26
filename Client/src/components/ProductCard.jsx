@@ -2,12 +2,14 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Button from "../reuse/Button";
 import { useAuth } from "../auth/useAuth";
+import { useCart } from "../context/UseCart";
 
 function ProductCard() {
   const { user, token } = useAuth();
   const [selectedSize, setSelectedSize] = useState(null);
   const [zoomedProductId, setZoomedProductId] = useState(null);
   const [products, setProducts] = useState([]);
+  const {addToCart} = useCart()
 
   // Fetch products from backend
   const fetchProducts = async () => {
@@ -156,6 +158,7 @@ function ProductCard() {
                     currentStock === 0 ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                   disabled={currentStock === 0}
+                  onClick={() => addToCart(product, currentSize)}
                 >
                   {currentStock === 0 ? "Sold Out" : "Add To Cart"}
                 </Button>

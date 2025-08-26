@@ -6,12 +6,15 @@ import { BrowserRouter } from "react-router";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { AuthProvider } from "./auth/AuthProvider.jsx";
 import { ThemeProvider } from "./context/ThemeProvider.jsx";
+import { CartProvider } from "./context/CartProvider.jsx";
 createRoot(document.getElementById("root")).render(
   <BrowserRouter>
     <StrictMode>
       <AuthProvider>
         <ThemeProvider>
-          <App />
+          <CartProvider>
+            <App />
+          </CartProvider>
         </ThemeProvider>
       </AuthProvider>
     </StrictMode>
