@@ -5,11 +5,12 @@ import cloudinary from "../config/cloudinary.js";
 import {
   createProduct,
   getProducts,
-  getProductById,
   updateProduct,
   deleteProduct,
   addRating,
+  getProduct,
 } from "../controllers/productController.js";
+import { authenticateToken,isAdmin } from "../middlewares/authorization.js";
 
 const router = express.Router();
 
@@ -25,10 +26,12 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage });
 
 // Routes
-router.post("/", upload.single("image"), createProduct);
 router.get("/", getProducts);
-router.get("/:id", getProductById);
-router.put("/:id", upload.single("image"), updateProduct);
-router.delete("/:id", deleteProduct);
-router.post("/:id/rating", addRating);
+router.get("/:id", getProduct);
+router.post("/:id/rating", authenticateToken, addRating);
+
+// Admin-only
+router.post("/", authenticateToken, isAdmin, upload.single("image"), createProduct);
+router.put("/:id", authenticateToken, isAdmin, upload.single("image"), updateProduct);
+router.delete("/:id", authenticateToken, isAdmin, deleteProduct);
 export default router;

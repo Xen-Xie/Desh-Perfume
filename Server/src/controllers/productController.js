@@ -2,57 +2,73 @@ import Product from "../models/Product.js";
 import cloudinary from "../config/cloudinary.js";
 
 // Create New Product
-
 export const createProduct = async (req, res) => {
   try {
-    const { name, category, sizes, description, priceRange } = req.body;
+    const { name, category, sizes, description } = req.body;
     const parseSizes = sizes ? JSON.parse(sizes) : [];
+
     const product = new Product({
       name,
       category,
       sizes: parseSizes,
       description,
-      priceRange,
       images: [],
     });
+
     if (req.file) {
       const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "Products",
+        folder: "products",
       });
       product.images.push({
         imageUrl: result.secure_url,
         publicId: result.public_id,
       });
     }
+
     await product.save();
     res.status(201).json(product);
   } catch (err) {
-    res.status(400).json({ message: "Error Creating Product" }, err);
+    res
+      .status(400)
+      .json({ message: "Error creating product", error: err.message });
   }
 };
 
 // Get All Products
-
 export const getProducts = async (req, res) => {
   try {
-    const products = await Product.find().populate("category");
+    const products = await Product.find(); // no populate since category is string
     res.json(products);
   } catch (err) {
-    res.status(500).json({ message: "Error fetching products", err });
+    res
+      .status(500)
+      .json({ message: "Error fetching products", error: err.message });
   }
 };
 
-// Upate Product
+// Get Single Product
+export const getProduct = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+    res.json(product);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Error fetching product", error: err.message });
+  }
+};
+
+// Update Product
 export const updateProduct = async (req, res) => {
   try {
-    const { name, category, sizes, description, priceRange } = req.body;
+    const { name, category, sizes, description } = req.body;
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
     if (name) product.name = name;
     if (description) product.description = description;
     if (category) product.category = category;
-    if (price) product.price = price;
     if (sizes) product.sizes = JSON.parse(sizes);
 
     if (req.file) {
@@ -69,7 +85,9 @@ export const updateProduct = async (req, res) => {
     await product.save();
     res.json(product);
   } catch (err) {
-    res.status(500).json({ message: "Error updating product", err });
+    res
+      .status(500)
+      .json({ message: "Error updating product", error: err.message });
   }
 };
 
@@ -86,7 +104,9 @@ export const deleteProduct = async (req, res) => {
     await product.deleteOne();
     res.json({ message: "Product deleted" });
   } catch (error) {
-    res.status(500).json({ message: "Error deleting product", error });
+    res
+      .status(500)
+      .json({ message: "Error deleting product", error: error.message });
   }
 };
 
@@ -115,6 +135,8 @@ export const addRating = async (req, res) => {
     await product.save();
     res.json(product);
   } catch (error) {
-    res.status(500).json({ message: "Error adding rating", error });
+    res
+      .status(500)
+      .json({ message: "Error adding rating", error: error.message });
   }
 };

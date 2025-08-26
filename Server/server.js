@@ -24,7 +24,7 @@ DB(url);
 
 // Routes
 app.use('/api/user',userRoutes)
-app.use('/api/product/create',ProductRoutes)
+app.use('/api/products', ProductRoutes);
 
 // Server Port
 const PORT = process.env.PORT || 5000;
