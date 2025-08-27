@@ -8,6 +8,7 @@ import Login from "./components/Login";
 import Error from "./pages/Error";
 import ProductPanel from "./pages/ProductPanel";
 import AdminRoute from "./routes/AdminRoute";
+import CheckOut from "./pages/CheckOut";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
               </AdminRoute>
             }
           />
+          <Route path="/checkout" element={<CheckOut />} />
           <Route path="*" element={<Error />} />
         </Route>
       </Routes>

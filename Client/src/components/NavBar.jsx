@@ -143,15 +143,17 @@ function NavBar() {
           {/* Rightside Menu*/}
           <div className="flex items-center gap-4">
             {/*Cart Icon*/}
-            <motion.button className="relative">
-              <i className="fa-solid fa-cart-shopping text-[25px] mt-[5px] cursor-pointer text-primarytext"></i>
+            <Link to="/checkout">
+              <motion.button className="relative">
+                <i className="fa-solid fa-cart-shopping text-[25px] mt-[5px] cursor-pointer text-primarytext"></i>
 
-              {totalCount > 0 && (
-                <span className="absolute -top-1 -right-2 bg-danger/85 text-primarybg dark:text-primarytext text-[11px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                  {totalCount}
-                </span>
-              )}
-            </motion.button>
+                {totalCount > 0 && (
+                  <span className="absolute -top-1 -right-2 bg-danger/85 text-primarybg dark:text-primarytext text-[11px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                    {totalCount}
+                  </span>
+                )}
+              </motion.button>
+            </Link>
 
             {/* Toggle Icon */}
             <motion.button

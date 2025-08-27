@@ -6,11 +6,12 @@ import { useCart } from "../context/UseCart";
 
 function ProductCard({ searchQuery, sortBy, size }) {
   const { user, token } = useAuth();
-  const { addToCart } = useCart();
+  const { addToCart, cartItems } = useCart();
 
   const [selectedSize, setSelectedSize] = useState(null);
   const [zoomedProductId, setZoomedProductId] = useState(null);
   const [products, setProducts] = useState([]);
+  const [stockMap, setStockMap] = useState({}); // Tracks real stock per product-size
 
   // Fetch products
   useEffect(() => {
@@ -24,6 +25,21 @@ function ProductCard({ searchQuery, sortBy, size }) {
     };
     fetchProducts();
   }, []);
+
+  // Update stockMap whenever products or cartItems change
+  useEffect(() => {
+    const updatedStock = {};
+    products.forEach((product) => {
+      product.sizes.forEach((s) => {
+        const key = `${product._id}-${s.size}`;
+        const inCart = cartItems.find(
+          (i) => i.product._id === product._id && i.size === s.size
+        )?.quantity || 0;
+        updatedStock[key] = s.quantity - inCart;
+      });
+    });
+    setStockMap(updatedStock);
+  }, [products, cartItems]);
 
   // Rating logic
   const handleStarClick = async (productId, value) => {
@@ -93,7 +109,9 @@ function ProductCard({ searchQuery, sortBy, size }) {
           (s) => s.size === currentSize
         );
         const currentPrice = currentSizeObj?.price || 0;
-        const currentStock = currentSizeObj?.quantity || 0;
+
+        // Real stock from stockMap
+        const currentStock = stockMap[`${product._id}-${currentSize}`] || 0;
 
         const averageRating = getAverageRating(product.ratings);
 
@@ -116,8 +134,8 @@ function ProductCard({ searchQuery, sortBy, size }) {
                   )
                 }
               />
-              {currentStock === 0 && (
-                <span className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">
+              {currentStock <= 0 && (
+                <span className="absolute top-2 right-2 bg-danger text-primarybg text-xs font-bold px-2 py-1 rounded">
                   Sold Out
                 </span>
               )}
@@ -186,16 +204,16 @@ function ProductCard({ searchQuery, sortBy, size }) {
 
                 <Button
                   className={`relative overflow-hidden bg-transparent border border-primarytext text-primarytext px-4 py-1 rounded-lg cursor-pointer ${
-                    currentStock === 0
+                    currentStock <= 0
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:scale-105 transition"
                   }`}
-                  disabled={currentStock === 0}
+                  disabled={currentStock <= 0}
                   onClick={() => addToCart(product, currentSize)}
                 >
                   <span className="absolute inset-0 bg-primarytext w-0 group-hover:w-full transition-all duration-300 ease-out z-0"></span>
                   <span className="relative z-10 group-hover:text-primarybg transition-colors duration-300">
-                    {currentStock === 0 ? "Sold Out" : "Add To Cart"}
+                    {currentStock <= 0 ? "Sold Out" : "Add To Cart"}
                   </span>
                 </Button>
               </div>
