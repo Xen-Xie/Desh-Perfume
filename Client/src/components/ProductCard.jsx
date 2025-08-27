@@ -4,31 +4,28 @@ import Button from "../reuse/Button";
 import { useAuth } from "../auth/useAuth";
 import { useCart } from "../context/UseCart";
 
-function ProductCard() {
+function ProductCard({ searchQuery, sortBy, size }) {
   const { user, token } = useAuth();
+  const { addToCart } = useCart();
+
   const [selectedSize, setSelectedSize] = useState(null);
   const [zoomedProductId, setZoomedProductId] = useState(null);
   const [products, setProducts] = useState([]);
-  const {addToCart} = useCart()
 
-  // Fetch products from backend
-  const fetchProducts = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/products");
-      setProducts(res.data);
-    } catch (err) {
-      console.error("Failed to fetch products:", err);
-    }
-  };
-
+  // Fetch products
   useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/products");
+        setProducts(res.data);
+      } catch (err) {
+        console.error("Failed to fetch products:", err);
+      }
+    };
     fetchProducts();
   }, []);
-  // Handle user selecting a specific size for a product
-  const handleSizeSelect = (productId, size) => {
-    setSelectedSize({ productId, size });
-  };
-  // Handle star rating click
+
+  // Rating logic
   const handleStarClick = async (productId, value) => {
     if (!user) return alert("Please login to rate");
 
@@ -45,19 +42,48 @@ function ProductCard() {
       console.error("Failed to rate product:", err);
     }
   };
-  // Calculate average rating of a product
+
   const getAverageRating = (ratings) => {
     if (!ratings?.length) return 0;
     const total = ratings.reduce((sum, r) => sum + r.value, 0);
     return (total / ratings.length).toFixed(1);
   };
-  // Check if the current user has already rated a product
+
   const hasRated = (product) =>
     product.ratings?.some((r) => r.user === user?._id);
 
+  //  Filtering dynamically
+  const filteredProducts = products
+    .filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    .filter((p) =>
+      size.length === 0
+        ? true
+        : p.sizes.some((s) =>
+            size.some(
+              (selectedSize) =>
+                s.size.toLowerCase() === selectedSize.toLowerCase()
+            )
+          )
+    )
+    .sort((a, b) => {
+      if (sortBy === "low-to-high") {
+        return (
+          Math.min(...a.sizes.map((s) => s.price)) -
+          Math.min(...b.sizes.map((s) => s.price))
+        );
+      }
+      if (sortBy === "high-to-low") {
+        return (
+          Math.max(...b.sizes.map((s) => s.price)) -
+          Math.max(...a.sizes.map((s) => s.price))
+        );
+      }
+      return 0;
+    });
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4">
-      {products.map((product) => {
+      {filteredProducts.map((product) => {
         const currentSize =
           selectedSize?.productId === product._id
             ? selectedSize.size
@@ -76,7 +102,7 @@ function ProductCard() {
             key={product._id}
             className="bg-cardbg shadow-md rounded-lg overflow-hidden flex flex-col font-primary"
           >
-            {/* Image + Sold Out Badge */}
+            {/* Product Image */}
             <div className="relative overflow-hidden">
               <img
                 src={product.images[0]?.imageUrl || "/placeholder.jpg"}
@@ -99,11 +125,11 @@ function ProductCard() {
 
             {/* Card Info */}
             <div className="p-4 flex flex-col flex-1">
-              <h2 className="text-lg font-bold text-primarytext text-center font-secondary">
+              <h2 className="text-lg font-bold text-primarytext text-center">
                 {product.name}
               </h2>
 
-              {/* Stars + Average Rating */}
+              {/* Stars + Avg */}
               <div className="flex justify-center items-center mt-2 gap-1">
                 {Array.from({ length: 5 }, (_, i) => (
                   <i
@@ -124,13 +150,18 @@ function ProductCard() {
                 </span>
               </div>
 
-              {/* Sizes Buttons */}
+              {/* Sizes */}
               <div className="flex justify-center mt-3 gap-2">
                 {product.sizes.map((s) => (
                   <div key={s.size} className="relative group">
                     <Button
                       value={s.size}
-                      onClick={() => handleSizeSelect(product._id, s.size)}
+                      onClick={() =>
+                        setSelectedSize({
+                          productId: product._id,
+                          size: s.size,
+                        })
+                      }
                       className={`px-2 py-1 text-xs border ${
                         currentSize === s.size
                           ? "border-accentone bg-transparent text-secondarytext"
@@ -146,21 +177,26 @@ function ProductCard() {
                 ))}
               </div>
 
-              {/* Price + Add To Cart */}
+              {/* Price + Stock + Cart */}
               <div className="mt-auto flex flex-col items-center gap-2">
                 <p className="font-semibold text-primarytext text-center">
                   ৳ {currentPrice}
                 </p>
-                <p className="text-secondarytext">In Stock:{currentStock}</p>
+                <p className="text-secondarytext">In Stock: {currentStock}</p>
 
                 <Button
-                  className={`bg-transparent border border-primarytext text-primarytext px-4 py-1 rounded-lg hover:scale-105 cursor-pointer ${
-                    currentStock === 0 ? "opacity-50 cursor-not-allowed" : ""
+                  className={`relative overflow-hidden bg-transparent border border-primarytext text-primarytext px-4 py-1 rounded-lg cursor-pointer ${
+                    currentStock === 0
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:scale-105 transition"
                   }`}
                   disabled={currentStock === 0}
                   onClick={() => addToCart(product, currentSize)}
                 >
-                  {currentStock === 0 ? "Sold Out" : "Add To Cart"}
+                  <span className="absolute inset-0 bg-primarytext w-0 group-hover:w-full transition-all duration-300 ease-out z-0"></span>
+                  <span className="relative z-10 group-hover:text-primarybg transition-colors duration-300">
+                    {currentStock === 0 ? "Sold Out" : "Add To Cart"}
+                  </span>
                 </Button>
               </div>
             </div>
