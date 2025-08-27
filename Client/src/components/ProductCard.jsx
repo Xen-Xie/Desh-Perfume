@@ -17,7 +17,7 @@ function ProductCard({ searchQuery, sortBy, size }) {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/products");
+        const res = await axios.get("https://desh-perfume.onrender.com/api/products");
         setProducts(res.data);
       } catch (err) {
         console.error("Failed to fetch products:", err);
@@ -47,7 +47,7 @@ function ProductCard({ searchQuery, sortBy, size }) {
 
     try {
       const res = await axios.post(
-        `http://localhost:5000/api/products/${productId}/rating`,
+        `https://desh-perfume.onrender.com/api/products/${productId}/rating`,
         { value },
         { headers: { Authorization: `Bearer ${token}` } }
       );

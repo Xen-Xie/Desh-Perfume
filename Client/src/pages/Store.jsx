@@ -18,12 +18,12 @@ function Store() {
   // Fetch dynamic categories and sizes
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/products/categories")
+      .get("https://desh-perfume.onrender.com/api/products/categories")
       .then((res) => setCategories(res.data))
       .catch((err) => console.error(err));
 
     axios
-      .get("http://localhost:5000/api/products/sizes")
+      .get("https://desh-perfume.onrender.com/api/products/sizes")
       .then((res) => setSizes(res.data))
       .catch((err) => console.error(err));
   }, []);

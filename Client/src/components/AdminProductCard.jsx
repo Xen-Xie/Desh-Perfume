@@ -21,7 +21,7 @@ function AdminProductCard() {
   // Fetch all products from backend API
   const fetchProducts = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/products");
+      const res = await axios.get("https://desh-perfume.onrender.com/api/products");
       setProducts(res.data);
     } catch (err) {
       console.error(err);
@@ -75,11 +75,11 @@ function AdminProductCard() {
       const token = localStorage.getItem("token");
       const res = editProduct
         ? await axios.put(
-            `http://localhost:5000/api/products/${editProduct._id}`,
+            `https://desh-perfume.onrender.com/api/products/${editProduct._id}`,
             data,
             { headers: { Authorization: `Bearer ${token}` } }
           )
-        : await axios.post("http://localhost:5000/api/products", data, {
+        : await axios.post("https://desh-perfume.onrender.com/api/products", data, {
             headers: { Authorization: `Bearer ${token}` },
           });
       // Update products state after edit
@@ -111,7 +111,7 @@ function AdminProductCard() {
   const handleDelete = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:5000/api/products/${id}`, {
+      await axios.delete(`https://desh-perfume.onrender.com/api/products/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProducts(products.filter((p) => p._id !== id));

@@ -78,7 +78,7 @@ function SignUp() {
 
     try {
       setLoading(true);
-      const res = await axios.post("http://0.0.0.0:5000/api/user/signup", form);
+      const res = await axios.post("https://desh-perfume.onrender.com/api/user/signup", form);
 
       if (res.data?.success) {
         setSuccess(res.data.message || "Signup successful!");
