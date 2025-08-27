@@ -4,7 +4,7 @@ import Button from "../reuse/Button";
 import { useAuth } from "../auth/useAuth";
 import { useCart } from "../context/UseCart";
 
-function ProductCard({ searchQuery, sortBy, size }) {
+function ProductCard({ searchQuery, sortBy, size,category }) {
   const { user, token } = useAuth();
   const { addToCart, cartItems } = useCart();
 
@@ -17,7 +17,9 @@ function ProductCard({ searchQuery, sortBy, size }) {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get("https://desh-perfume.onrender.com/api/products");
+        const res = await axios.get(
+          "https://desh-perfume.onrender.com/api/products"
+        );
         setProducts(res.data);
       } catch (err) {
         console.error("Failed to fetch products:", err);
@@ -32,9 +34,10 @@ function ProductCard({ searchQuery, sortBy, size }) {
     products.forEach((product) => {
       product.sizes.forEach((s) => {
         const key = `${product._id}-${s.size}`;
-        const inCart = cartItems.find(
-          (i) => i.product._id === product._id && i.size === s.size
-        )?.quantity || 0;
+        const inCart =
+          cartItems.find(
+            (i) => i.product._id === product._id && i.size === s.size
+          )?.quantity || 0;
         updatedStock[key] = s.quantity - inCart;
       });
     });
@@ -70,7 +73,13 @@ function ProductCard({ searchQuery, sortBy, size }) {
 
   //  Filtering dynamically
   const filteredProducts = products
+    // Filter by search query
     .filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+
+    // Filter by selected category
+    .filter((p) => (category === "all" ? true : p.category === category))
+
+    // Filter by size
     .filter((p) =>
       size.length === 0
         ? true
@@ -81,6 +90,8 @@ function ProductCard({ searchQuery, sortBy, size }) {
             )
           )
     )
+
+    // Sort by price
     .sort((a, b) => {
       if (sortBy === "low-to-high") {
         return (
