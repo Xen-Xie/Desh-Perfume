@@ -140,3 +140,30 @@ export const addRating = async (req, res) => {
       .json({ message: "Error adding rating", error: error.message });
   }
 };
+
+// Get Category
+export const getCategories = async (req, res) => {
+  try {
+    const categories = await Product.distinct("category");
+    res.json(categories);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch categories" });
+  }
+};
+// Get Sizes
+export const getSizes = async (req, res) => {
+  try {
+    const products = await Product.find({}, "sizes").lean();
+
+    // Extract just the size names
+    const allSizes = products.flatMap(
+      (p) => p.sizes.map((s) => s.size) // extract 'size' property
+    );
+
+    const uniqueSizes = [...new Set(allSizes)]; // get unique values
+
+    res.json(uniqueSizes);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

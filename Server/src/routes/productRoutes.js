@@ -9,8 +9,10 @@ import {
   deleteProduct,
   addRating,
   getProduct,
+  getCategories,
+  getSizes,
 } from "../controllers/productController.js";
-import { authenticateToken,isAdmin } from "../middlewares/authorization.js";
+import { authenticateToken, isAdmin } from "../middlewares/authorization.js";
 
 const router = express.Router();
 
@@ -27,11 +29,25 @@ const upload = multer({ storage });
 
 // Routes
 router.get("/", getProducts);
+router.get("/categories", getCategories);
+router.get("/sizes", getSizes);
 router.get("/:id", getProduct);
 router.post("/:id/rating", authenticateToken, addRating);
 
 // Admin-only
-router.post("/", authenticateToken, isAdmin, upload.single("image"), createProduct);
-router.put("/:id", authenticateToken, isAdmin, upload.single("image"), updateProduct);
+router.post(
+  "/",
+  authenticateToken,
+  isAdmin,
+  upload.single("image"),
+  createProduct
+);
+router.put(
+  "/:id",
+  authenticateToken,
+  isAdmin,
+  upload.single("image"),
+  updateProduct
+);
 router.delete("/:id", authenticateToken, isAdmin, deleteProduct);
 export default router;
