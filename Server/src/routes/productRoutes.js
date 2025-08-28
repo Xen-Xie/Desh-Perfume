@@ -39,14 +39,14 @@ router.post(
   "/",
   authenticateToken,
   isAdmin,
-  upload.single("image"),
+  upload.array("images", 10),
   createProduct
 );
 router.put(
   "/:id",
   authenticateToken,
   isAdmin,
-  upload.single("image"),
+  upload.array("images", 10),
   updateProduct
 );
 router.delete("/:id", authenticateToken, isAdmin, deleteProduct);

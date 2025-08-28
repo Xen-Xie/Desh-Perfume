@@ -15,14 +15,16 @@ export const createProduct = async (req, res) => {
       images: [],
     });
 
-    if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "products",
-      });
-      product.images.push({
-        imageUrl: result.secure_url,
-        publicId: result.public_id,
-      });
+    if (req.files && req.files.length > 0) {
+      for (const [index, file] of req.files.entries()) {
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: "products",
+        });
+        product.images[index] = {
+          imageUrl: result.secure_url,
+          publicId: result.public_id,
+        };
+      }
     }
 
     await product.save();
@@ -71,15 +73,16 @@ export const updateProduct = async (req, res) => {
     if (category) product.category = category;
     if (sizes) product.sizes = JSON.parse(sizes);
 
-    if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "products",
-      });
-      product.images.push({
-        imageUrl: result.secure_url,
-        publicId: result.public_id,
-        caption: req.body.caption || "",
-      });
+    if (req.files && req.files.length > 0) {
+      for (const [index, file] of req.files.entries()) {
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: "products",
+        });
+        product.images[index] = {
+          imageUrl: result.secure_url,
+          publicId: result.public_id,
+        };
+      }
     }
 
     await product.save();
