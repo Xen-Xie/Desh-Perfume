@@ -7,25 +7,30 @@ export const createProduct = async (req, res) => {
     const { name, category, sizes, description } = req.body;
     const parseSizes = sizes ? JSON.parse(sizes) : [];
 
+    // Assign images to sizes
+    if (req.files && req.files.length > 0) {
+      parseSizes.forEach((s, idx) => {
+        if (req.files[idx]) {
+          s.imageUrl = req.files[idx].path; // temporary path
+        }
+      });
+    }
+
+    // Upload images to Cloudinary
+    for (const [idx, file] of (req.files || []).entries()) {
+      const result = await cloudinary.uploader.upload(file.path, {
+        folder: "products",
+      });
+      parseSizes[idx].imageUrl = result.secure_url; // assign final URL
+    }
+
     const product = new Product({
       name,
       category,
       sizes: parseSizes,
       description,
-      images: [],
+      images: parseSizes.map((s) => ({ imageUrl: s.imageUrl, publicId: "" })),
     });
-
-    if (req.files && req.files.length > 0) {
-      for (const [index, file] of req.files.entries()) {
-        const result = await cloudinary.uploader.upload(file.path, {
-          folder: "products",
-        });
-        product.images[index] = {
-          imageUrl: result.secure_url,
-          publicId: result.public_id,
-        };
-      }
-    }
 
     await product.save();
     res.status(201).json(product);
@@ -71,19 +76,30 @@ export const updateProduct = async (req, res) => {
     if (name) product.name = name;
     if (description) product.description = description;
     if (category) product.category = category;
-    if (sizes) product.sizes = JSON.parse(sizes);
 
+    let parseSizes = sizes ? JSON.parse(sizes) : product.sizes;
+
+    // Assign images to sizes
     if (req.files && req.files.length > 0) {
-      for (const [index, file] of req.files.entries()) {
+      parseSizes.forEach((s, idx) => {
+        if (req.files[idx]) {
+          s.imageUrl = req.files[idx].path; // temporary path
+        }
+      });
+
+      for (const [idx, file] of req.files.entries()) {
         const result = await cloudinary.uploader.upload(file.path, {
           folder: "products",
         });
-        product.images[index] = {
-          imageUrl: result.secure_url,
-          publicId: result.public_id,
-        };
+        parseSizes[idx].imageUrl = result.secure_url;
       }
     }
+
+    product.sizes = parseSizes;
+    product.images = parseSizes.map((s) => ({
+      imageUrl: s.imageUrl,
+      publicId: "",
+    }));
 
     await product.save();
     res.json(product);
