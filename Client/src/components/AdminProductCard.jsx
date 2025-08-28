@@ -36,9 +36,13 @@ function AdminProductCard() {
       const res = await axios.get(
         "https://desh-perfume.onrender.com/api/products"
       );
-      setProducts(res.data);
+      const productsWithIndex = res.data.map((p) => ({
+        ...p,
+        currentImageIndex: 0,
+      }));
+      setProducts(productsWithIndex);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to fetch products:", err);
     }
   };
 
@@ -81,7 +85,7 @@ function AdminProductCard() {
   const handleSizeImageChange = (index, file) => {
     const updatedSizes = [...formData.sizes];
     updatedSizes[index].image = file;
-    updatedSizes[index].existingImage = null; // if uploading new, clear old preview
+    updatedSizes[index].existingImage = null;
     setFormData({ ...formData, sizes: updatedSizes });
   };
 
@@ -97,16 +101,16 @@ function AdminProductCard() {
       data.append("category", formData.category);
       data.append("description", formData.description);
 
-      // Append sizes JSON without images (ESLint-safe)
+      // size images mapping
       const sizesWithoutImages = formData.sizes.map((s) => {
-        const { image, existingImage, ...rest } = s; // destructure to strip images
+        const { image, existingImage, ...rest } = s;
         return rest;
       });
       data.append("sizes", JSON.stringify(sizesWithoutImages));
 
       // Append all images separately
       formData.sizes.forEach((s) => {
-        if (s.image) data.append("images", s.image); // backend expects array
+        if (s.image) data.append("images", s.image);
       });
 
       const token = localStorage.getItem("token");
@@ -121,19 +125,21 @@ function AdminProductCard() {
         : await axios.post(
             "https://desh-perfume.onrender.com/api/products",
             data,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
+            { headers: { Authorization: `Bearer ${token}` } }
           );
 
       // Update products state after edit/add
       if (editProduct) {
         setProducts((prev) =>
-          prev.map((p) => (p._id === editProduct._id ? res.data : p))
+          prev.map((p) =>
+            p._id === editProduct._id
+              ? { ...res.data, currentImageIndex: 0 }
+              : p
+          )
         );
         setEditProduct(null);
       } else {
-        setProducts([...products, res.data]);
+        setProducts([...products, { ...res.data, currentImageIndex: 0 }]);
       }
 
       // Reset form after submission
@@ -154,7 +160,7 @@ function AdminProductCard() {
 
       alert(editProduct ? "Product updated!" : "Product added!");
     } catch (err) {
-      console.error(err);
+      console.error("Error saving product:", err);
       alert("Error saving product");
     } finally {
       setLoading(false);
@@ -173,7 +179,7 @@ function AdminProductCard() {
       );
       setProducts(products.filter((p) => p._id !== id));
     } catch (err) {
-      console.error(err);
+      console.error("Failed to delete product:", err);
       alert("Failed to delete product");
     }
   };
@@ -189,15 +195,15 @@ function AdminProductCard() {
         size: s.size,
         price: s.price,
         quantity: s.quantity,
-        image: null, // for new upload
-        existingImage: product.images?.[i]?.imageUrl || null, // keep current
+        image: null,
+        existingImage: product.images?.[i]?.imageUrl || null,
       })),
     });
   };
 
   return (
     <div className="p-4 font-primary">
-      {/* Add / Edit Product Form */}
+      {/* Form */}
       <form
         className="mb-6 bg-cardbg p-4 rounded shadow-md flex flex-col gap-2"
         onSubmit={handleSubmit}
@@ -349,7 +355,7 @@ function AdminProductCard() {
         </div>
       </form>
 
-      {/* Existing Products */}
+      {/* Products Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {products.map((product) => (
           <div
@@ -377,50 +383,48 @@ function AdminProductCard() {
 
               {/* Previous Button */}
               {product.images?.length > 1 && (
-                <Button
-                  onClick={() =>
-                    setProducts((prev) =>
-                      prev.map((p) =>
-                        p._id === product._id
-                          ? {
-                              ...p,
-                              currentImageIndex:
-                                ((p.currentImageIndex || 0) -
-                                  1 +
-                                  p.images.length) %
-                                p.images.length,
-                            }
-                          : p
+                <>
+                  <Button
+                    onClick={() =>
+                      setProducts((prev) =>
+                        prev.map((p) =>
+                          p._id === product._id
+                            ? {
+                                ...p,
+                                currentImageIndex:
+                                  ((p.currentImageIndex || 0) -
+                                    1 +
+                                    p.images.length) %
+                                  p.images.length,
+                              }
+                            : p
+                        )
                       )
-                    )
-                  }
-                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-primarybg/40 text-primarytext px-2 py-2 rounded"
-                >
-                  <i className="fa-solid fa-arrow-left"></i>
-                </Button>
-              )}
-
-              {/* Next Button */}
-              {product.images?.length > 1 && (
-                <Button
-                  onClick={() =>
-                    setProducts((prev) =>
-                      prev.map((p) =>
-                        p._id === product._id
-                          ? {
-                              ...p,
-                              currentImageIndex:
-                                ((p.currentImageIndex || 0) + 1) %
-                                p.images.length,
-                            }
-                          : p
+                    }
+                    className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-primarybg/40 text-primarytext px-2 py-2 rounded"
+                  >
+                    <i className="fa-solid fa-arrow-left"></i>
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      setProducts((prev) =>
+                        prev.map((p) =>
+                          p._id === product._id
+                            ? {
+                                ...p,
+                                currentImageIndex:
+                                  ((p.currentImageIndex || 0) + 1) %
+                                  p.images.length,
+                              }
+                            : p
+                        )
                       )
-                    )
-                  }
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primarybg/40 text-primarytext px-2 py-2 rounded"
-                >
-                  <i className="fa-solid fa-arrow-right"></i>
-                </Button>
+                    }
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primarybg/40 text-primarytext px-2 py-2 rounded"
+                  >
+                    <i className="fa-solid fa-arrow-right"></i>
+                  </Button>
+                </>
               )}
 
               {product.soldOut && (
