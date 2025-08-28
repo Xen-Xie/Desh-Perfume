@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Button from "../reuse/Button";
@@ -6,22 +7,35 @@ function AdminProductCard() {
   // Base button styling for reuse in edit/delete buttons
   const btnBase =
     "flex-1 h-10 px-3 text-sm font-semibold inline-flex items-center justify-center rounded-md whitespace-nowrap transition focus:outline-none focus:ring-2 focus:ring-offset-0";
+
   // State to store all products fetched from the backend
   const [products, setProducts] = useState([]);
+
   // State to handle the form inputs for adding/editing a product
   const [formData, setFormData] = useState({
     name: "",
     category: "",
     description: "",
-    sizes: [{ size: "Small", price: 0, quantity: 0 }],
-    image: null,
+    sizes: [
+      {
+        size: "",
+        price: 0,
+        quantity: 0,
+        image: null,
+        existingImage: null,
+      },
+    ],
   });
+
   const [loading, setLoading] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
+
   // Fetch all products from backend API
   const fetchProducts = async () => {
     try {
-      const res = await axios.get("https://desh-perfume.onrender.com/api/products");
+      const res = await axios.get(
+        "https://desh-perfume.onrender.com/api/products"
+      );
       setProducts(res.data);
     } catch (err) {
       console.error(err);
@@ -31,10 +45,12 @@ function AdminProductCard() {
   useEffect(() => {
     fetchProducts();
   }, []);
+
   // Handle text inputs (name, category, description)
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
   // Handle changes in sizes array (size, price, quantity)
   const handleSizeChange = (index, field, value) => {
     const updatedSizes = [...formData.sizes];
@@ -42,47 +58,75 @@ function AdminProductCard() {
       field === "price" || field === "quantity" ? Number(value) : value;
     setFormData({ ...formData, sizes: updatedSizes });
   };
+
   // Add a new size object to the sizes array
   const addSize = () => {
     setFormData({
       ...formData,
-      sizes: [...formData.sizes, { size: "", price: 0, quantity: 0 }],
+      sizes: [
+        ...formData.sizes,
+        { size: "", price: 0, quantity: 0, image: null, existingImage: null },
+      ],
     });
   };
+
   // Remove a size from the sizes array
   const removeSize = (index) => {
     const updatedSizes = [...formData.sizes];
     updatedSizes.splice(index, 1);
     setFormData({ ...formData, sizes: updatedSizes });
   };
-  // Handle image selection from file input
-  const handleImageChange = (e) => {
-    setFormData({ ...formData, image: e.target.files[0] });
+
+  // Handle image change for a specific size
+  const handleSizeImageChange = (index, file) => {
+    const updatedSizes = [...formData.sizes];
+    updatedSizes[index].image = file;
+    updatedSizes[index].existingImage = null; // if uploading new, clear old preview
+    setFormData({ ...formData, sizes: updatedSizes });
   };
+
   // Handle form submission for adding or editing a product
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
+
       // Prepare form data to send to backend
       const data = new FormData();
       data.append("name", formData.name);
       data.append("category", formData.category);
       data.append("description", formData.description);
-      data.append("sizes", JSON.stringify(formData.sizes));
-      if (formData.image) data.append("image", formData.image);
+
+      // Append sizes JSON without images (ESLint-safe)
+      const sizesWithoutImages = formData.sizes.map((s) => {
+        const { image, existingImage, ...rest } = s; // destructure to strip images
+        return rest;
+      });
+      data.append("sizes", JSON.stringify(sizesWithoutImages));
+
+      // Append all images separately
+      formData.sizes.forEach((s) => {
+        if (s.image) data.append("images", s.image); // backend expects array
+      });
 
       const token = localStorage.getItem("token");
+
+      // Send request based on edit or add
       const res = editProduct
         ? await axios.put(
             `https://desh-perfume.onrender.com/api/products/${editProduct._id}`,
             data,
             { headers: { Authorization: `Bearer ${token}` } }
           )
-        : await axios.post("https://desh-perfume.onrender.com/api/products", data, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-      // Update products state after edit
+        : await axios.post(
+            "https://desh-perfume.onrender.com/api/products",
+            data,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+
+      // Update products state after edit/add
       if (editProduct) {
         setProducts((prev) =>
           prev.map((p) => (p._id === editProduct._id ? res.data : p))
@@ -91,14 +135,23 @@ function AdminProductCard() {
       } else {
         setProducts([...products, res.data]);
       }
+
       // Reset form after submission
       setFormData({
         name: "",
         category: "",
         description: "",
-        sizes: [{ size: "Small", price: 0, quantity: 0 }],
-        image: null,
+        sizes: [
+          {
+            size: "",
+            price: 0,
+            quantity: 0,
+            image: null,
+            existingImage: null,
+          },
+        ],
       });
+
       alert(editProduct ? "Product updated!" : "Product added!");
     } catch (err) {
       console.error(err);
@@ -107,19 +160,24 @@ function AdminProductCard() {
       setLoading(false);
     }
   };
+
   // Delete a product by ID
   const handleDelete = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`https://desh-perfume.onrender.com/api/products/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.delete(
+        `https://desh-perfume.onrender.com/api/products/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setProducts(products.filter((p) => p._id !== id));
     } catch (err) {
       console.error(err);
       alert("Failed to delete product");
     }
   };
+
   // Populate form with existing product data for editing
   const handleEdit = (product) => {
     setEditProduct(product);
@@ -127,8 +185,13 @@ function AdminProductCard() {
       name: product.name,
       category: product.category,
       description: product.description,
-      sizes: product.sizes,
-      image: null,
+      sizes: product.sizes.map((s, i) => ({
+        size: s.size,
+        price: s.price,
+        quantity: s.quantity,
+        image: null, // for new upload
+        existingImage: product.images?.[i]?.imageUrl || null, // keep current
+      })),
     });
   };
 
@@ -143,6 +206,7 @@ function AdminProductCard() {
           {editProduct ? "Edit Product" : "Add New Product"}
         </h2>
 
+        {/* Product Basic Info */}
         <input
           type="text"
           name="name"
@@ -152,7 +216,6 @@ function AdminProductCard() {
           className="admin-input"
           required
         />
-
         <input
           type="text"
           name="category"
@@ -162,7 +225,6 @@ function AdminProductCard() {
           className="admin-input"
           required
         />
-
         <textarea
           name="description"
           value={formData.description}
@@ -171,13 +233,14 @@ function AdminProductCard() {
           className="admin-input"
         />
 
-        {/* Sizes, Price, Stock */}
+        {/* Sizes, Price, Stock & Image */}
         <div>
           <label className="font-semibold text-primarytext">
             Sizes, Prices & Stock
           </label>
+
           {formData.sizes.map((s, i) => (
-            <div key={i} className="flex gap-2 mt-1 items-center">
+            <div key={i} className="flex gap-2 mt-1 items-center flex-wrap">
               <input
                 type="text"
                 value={s.size}
@@ -204,15 +267,33 @@ function AdminProductCard() {
                 className="border px-2 py-1 rounded w-20 border-primarytext text-primarytext focus:outline-0"
                 required
               />
+
+              {/* Show existing image preview if available */}
+              {s.existingImage && !s.image && (
+                <img
+                  src={s.existingImage}
+                  alt="preview"
+                  className="w-10 h-10 object-cover rounded"
+                />
+              )}
+
+              {/* File input for this size */}
+              <input
+                type="file"
+                onChange={(e) => handleSizeImageChange(i, e.target.files[0])}
+                className="text-primarytext"
+              />
+
               <Button
                 type="button"
                 onClick={() => removeSize(i)}
                 className="bg-danger text-white px-3 sm:px-2 py-[9px] rounded"
               >
-                <i class="fa-solid fa-xmark"></i>
+                <i className="fa-solid fa-xmark"></i>
               </Button>
             </div>
           ))}
+
           <Button
             type="button"
             onClick={addSize}
@@ -222,23 +303,50 @@ function AdminProductCard() {
           </Button>
         </div>
 
-        <input
-          type="file"
-          onChange={handleImageChange}
-          className="mt-2 text-primarytext"
-        />
-
-        <Button
-          type="submit"
-          className="mt-3 text-primarybg"
-          disabled={loading}
+        {/* Submit & Cancel Buttons */}
+        <div
+          className={`grid grid-cols-1 sm:grid-cols-${
+            editProduct ? 2 : 1
+          } gap-2 mt-3`}
         >
-          {loading
-            ? "Saving..."
-            : editProduct
-            ? "Update Product"
-            : "Add Product"}
-        </Button>
+          <Button
+            type="submit"
+            className={`text-primarytext bg-success hover:bg-success/50 transition-all duration-300 cursor-pointer px-3 py-2`}
+            disabled={loading}
+          >
+            {loading
+              ? "Saving..."
+              : editProduct
+              ? "Update Product"
+              : "Add Product"}
+          </Button>
+
+          {editProduct && (
+            <Button
+              type="button"
+              onClick={() => {
+                setEditProduct(null);
+                setFormData({
+                  name: "",
+                  category: "",
+                  description: "",
+                  sizes: [
+                    {
+                      size: "",
+                      price: 0,
+                      quantity: 0,
+                      image: null,
+                      existingImage: null,
+                    },
+                  ],
+                });
+              }}
+              className="flex-1 bg-danger text-primarytext hover:bg-danger/50 transition-all duration-300 cursor-pointer px-3 py-2"
+            >
+              Cancel
+            </Button>
+          )}
+        </div>
       </form>
 
       {/* Existing Products */}
@@ -248,12 +356,73 @@ function AdminProductCard() {
             key={product._id}
             className="bg-cardbg shadow-md rounded-lg overflow-hidden flex flex-col"
           >
-            <div className="relative overflow-hidden">
-              <img
-                src={product.images?.[0]?.imageUrl || "/placeholder.jpg"}
-                alt={product.name}
-                className="w-full h-48 object-cover transform transition-transform duration-300 ease-in-out hover:scale-110"
-              />
+            <div className="relative overflow-hidden h-48">
+              <div
+                className="flex transition-transform duration-500 ease-in-out h-full"
+                style={{
+                  transform: `translateX(-${
+                    (product.currentImageIndex || 0) * 100
+                  }%)`,
+                }}
+              >
+                {product.images?.map((img, idx) => (
+                  <img
+                    key={img.publicId || idx}
+                    src={img.imageUrl}
+                    alt={product.name}
+                    className="w-full flex-shrink-0 h-48 object-cover"
+                  />
+                ))}
+              </div>
+
+              {/* Previous Button */}
+              {product.images?.length > 1 && (
+                <Button
+                  onClick={() =>
+                    setProducts((prev) =>
+                      prev.map((p) =>
+                        p._id === product._id
+                          ? {
+                              ...p,
+                              currentImageIndex:
+                                ((p.currentImageIndex || 0) -
+                                  1 +
+                                  p.images.length) %
+                                p.images.length,
+                            }
+                          : p
+                      )
+                    )
+                  }
+                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-primarybg/40 text-primarytext px-2 py-2 rounded"
+                >
+                  <i className="fa-solid fa-arrow-left"></i>
+                </Button>
+              )}
+
+              {/* Next Button */}
+              {product.images?.length > 1 && (
+                <Button
+                  onClick={() =>
+                    setProducts((prev) =>
+                      prev.map((p) =>
+                        p._id === product._id
+                          ? {
+                              ...p,
+                              currentImageIndex:
+                                ((p.currentImageIndex || 0) + 1) %
+                                p.images.length,
+                            }
+                          : p
+                      )
+                    )
+                  }
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primarybg/40 text-primarytext px-2 py-2 rounded"
+                >
+                  <i className="fa-solid fa-arrow-right"></i>
+                </Button>
+              )}
+
               {product.soldOut && (
                 <span className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">
                   Sold Out
@@ -281,7 +450,7 @@ function AdminProductCard() {
                       s.quantity > 0 ? "text-green-600" : "text-red-600"
                     }`}
                   >
-                    {s.size}: {s.quantity} in stock (${s.price})
+                    {s.size}: {s.quantity} in stock (৳{s.price})
                   </p>
                 ))}
               </div>
@@ -294,7 +463,6 @@ function AdminProductCard() {
                 >
                   Edit
                 </Button>
-
                 <Button
                   className={`${btnBase} bg-danger text-white hover:bg-red-700`}
                   onClick={() => handleDelete(product._id)}
