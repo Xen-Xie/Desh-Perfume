@@ -14,6 +14,7 @@ function ProductCard({ searchQuery, sortBy, size, category }) {
   const [selectedProduct, setSelectedProduct] = useState(null); // Modal
 
   const [imgLoaded, setImgLoaded] = useState(true);
+  const [showFullDesc, setShowFullDesc] = useState(false);
 
   // Fetch products
   useEffect(() => {
@@ -42,7 +43,7 @@ function ProductCard({ searchQuery, sortBy, size, category }) {
     fetchProducts();
   }, []);
 
-  //reset fade state whenever the displayed modal image changes
+  // Reset fade state whenever modal image changes
   const selectedProductId = selectedProduct?._id;
   const selectedImageUrl =
     selectedProductId && selectedOptions[selectedProductId]
@@ -54,7 +55,7 @@ function ProductCard({ searchQuery, sortBy, size, category }) {
     setImgLoaded(false);
   }, [selectedProduct, selectedImageUrl]);
 
-  // Update stockMap
+  // Update stock map
   useEffect(() => {
     const updatedStock = {};
     products.forEach((product) => {
@@ -69,6 +70,13 @@ function ProductCard({ searchQuery, sortBy, size, category }) {
     });
     setStockMap(updatedStock);
   }, [products, cartItems]);
+
+  // Disable scrolling when modal is open
+  useEffect(() => {
+    if (selectedProduct) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "auto";
+    return () => (document.body.style.overflow = "auto");
+  }, [selectedProduct]);
 
   // Rating helpers
   const handleStarClick = async (productId, value) => {
@@ -96,7 +104,20 @@ function ProductCard({ searchQuery, sortBy, size, category }) {
   const hasRated = (product) =>
     product.ratings?.some((r) => r.user === user?._id);
 
-  // Filter & sort
+  // Handle size change
+  const handleSizeChange = (productId, size) => {
+    const product = products.find((p) => p._id === productId);
+    if (!product) return;
+    const idx = product.sizes.findIndex((s) => s.size === size);
+    const imageUrl =
+      product.images?.[idx]?.imageUrl || product.images?.[0]?.imageUrl || "";
+    setSelectedOptions((prev) => ({
+      ...prev,
+      [productId]: { size, imageUrl },
+    }));
+  };
+
+  // Filter, sort, group
   const filteredProducts = products
     // Filter by search query
     .filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -118,91 +139,76 @@ function ProductCard({ searchQuery, sortBy, size, category }) {
 
     // Sort by price
     .sort((a, b) => {
-      if (sortBy === "low-to-high") {
+      if (sortBy === "low-to-high")
         return (
           Math.min(...a.sizes.map((s) => s.price)) -
           Math.min(...b.sizes.map((s) => s.price))
         );
-      }
-      if (sortBy === "high-to-low") {
+      if (sortBy === "high-to-low")
         return (
           Math.max(...b.sizes.map((s) => s.price)) -
           Math.max(...a.sizes.map((s) => s.price))
         );
-      }
       return 0;
     });
 
-  // Handle size change
-  const handleSizeChange = (productId, size) => {
-    const product = products.find((p) => p._id === productId);
-    if (!product) return;
-    // index-mapped image
-    const idx = product.sizes.findIndex((s) => s.size === size);
-    const imageUrl =
-      product.images?.[idx]?.imageUrl || product.images?.[0]?.imageUrl || "";
-    setSelectedOptions((prev) => ({
-      ...prev,
-      [productId]: { size, imageUrl },
-    }));
-  };
-  // Disable scrolling o popup
-  useEffect(() => {
-    if (selectedProduct) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
-    // Cleanup on unmount
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, [selectedProduct]);
-  const [showFullDesc, setShowFullDesc] = useState(false);
+  const groupedProducts = filteredProducts.reduce((acc, product) => {
+    if (!acc[product.category]) acc[product.category] = [];
+    acc[product.category].push(product);
+    return acc;
+  }, {});
 
   return (
     <>
-      {/* Product Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6 p-4">
-        {filteredProducts.map((product) => {
-          const selected = selectedOptions[product._id] || {};
-          const currentPrice =
-            product.sizes.find((s) => s.size === selected.size)?.price ||
-            Math.min(...product.sizes.map((s) => s.price));
+      {/* Product Categories */}
+      {Object.entries(groupedProducts).map(([catName, catProducts]) => (
+        <div key={catName} className="mb-10">
+          <h2 className="text-2xl font-semibold mb-4">
+            {catName} ({catProducts.length})
+          </h2>
 
-          return (
-            <div
-              key={product._id}
-              className="bg-cardbg shadow-md rounded-lg overflow-hidden flex flex-col justify-between h-full cursor-pointer"
-            >
-              <img
-                src={
-                  selected.imageUrl ||
-                  product.images[0]?.imageUrl ||
-                  "/placeholder.jpg"
-                }
-                alt={product.name}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-3 flex flex-col justify-between flex-1">
-                <div className="text-center">
-                  <h2 className="text-lg font-bold">{product.name}</h2>
-                  <p className="font-semibold mt-1">৳ {currentPrice}</p>
-                </div>
-                <Button
-                  onClick={() => setSelectedProduct(product)}
-                  className="mt-2 py-[0.3] xs:py-1 px-[0.5] xs:px-4 cursor-pointer"
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6 p-4">
+            {catProducts.map((product) => {
+              const selected = selectedOptions[product._id] || {};
+              const currentPrice =
+                product.sizes.find((s) => s.size === selected.size)?.price ||
+                Math.min(...product.sizes.map((s) => s.price));
+
+              return (
+                <div
+                  key={product._id}
+                  className="bg-cardbg shadow-md rounded-lg overflow-hidden flex flex-col justify-between h-full cursor-pointer"
                 >
-                  <span className="absolute inset-0 bg-primarytext w-0 group-hover:w-full transition-all duration-300 ease-out z-0"></span>
-                  <span className="relative z-10 group-hover:text-primarybg transition-colors duration-300">
-                    View Details
-                  </span>
-                </Button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+                  <img
+                    src={
+                      selected.imageUrl ||
+                      product.images[0]?.imageUrl ||
+                      "/placeholder.jpg"
+                    }
+                    alt={product.name}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="p-3 flex flex-col justify-between flex-1">
+                    <div className="text-center">
+                      <h2 className="text-lg font-bold">{product.name}</h2>
+                      <p className="font-semibold mt-1">৳ {currentPrice}</p>
+                    </div>
+                    <Button
+                      onClick={() => setSelectedProduct(product)}
+                      className="mt-2 py-[0.3] xs:py-1 px-[0.5] xs:px-4 cursor-pointer"
+                    >
+                      <span className="absolute inset-0 bg-primarytext w-0 group-hover:w-full transition-all duration-300 ease-out z-0"></span>
+                      <span className="relative z-10 group-hover:text-primarybg transition-colors duration-300">
+                        View Details
+                      </span>
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
 
       {/* Product Details Modal */}
       {selectedProduct && (
@@ -214,7 +220,7 @@ function ProductCard({ searchQuery, sortBy, size, category }) {
             >
               <i
                 className="fa-solid fa-xmark cursor-pointer text-[18px] xs:text-xl transition-colors
-            hover:text-danger hover:animate-spin-forward"
+           hover:text-danger hover:animate-spin-forward"
                 onMouseLeave={(e) => {
                   e.currentTarget.classList.remove("animate-spin-forward");
                   e.currentTarget.classList.add("animate-spin-backward");
@@ -243,8 +249,8 @@ function ProductCard({ searchQuery, sortBy, size, category }) {
                 alt={selectedProduct.name}
                 onLoad={() => setImgLoaded(true)}
                 className={`w-full h-full object-contain transition-transform duration-500 ease-in-out
-     ${imgLoaded ? "opacity-100" : "opacity-0"}
-     group-hover:scale-110 rounded-lg`}
+    ${imgLoaded ? "opacity-100" : "opacity-0"}
+    group-hover:scale-110 rounded-lg`}
               />
             </div>
 
@@ -256,7 +262,7 @@ function ProductCard({ searchQuery, sortBy, size, category }) {
               )?.price ||
                 Math.min(...selectedProduct.sizes.map((s) => s.price))}
             </p>
-            {/* Description with toggle */}
+
             {/* Description with toggle */}
             <div className="mt-2 text-secondarytext max-h-24 overflow-y-auto custom-scrollbar">
               <p>
@@ -286,7 +292,6 @@ function ProductCard({ searchQuery, sortBy, size, category }) {
               {selectedProduct.sizes.map((s) => (
                 <Button
                   key={s.size}
-                  value={s.size}
                   onClick={() => handleSizeChange(selectedProduct._id, s.size)}
                   className={`px-[1px] py-[1px] sm:px-3 sm:py-1 border cursor-pointer  text-sm sm:text-base ${
                     selectedOptions[selectedProduct._id]?.size === s.size
@@ -312,14 +317,14 @@ function ProductCard({ searchQuery, sortBy, size, category }) {
             {/* Add to Cart */}
             <Button
               className={`relative mt-4 w-full overflow-hidden group
-   ${
-     stockMap[
-       `${selectedProduct._id}-${selectedOptions[selectedProduct._id]?.size}`
-     ] > 0
-       ? "bg-success text-primarytext hover:opacity-90 cursor-pointer"
-       : "bg-danger text-primarytext cursor-not-allowed"
-   }
- `}
+  ${
+    stockMap[
+      `${selectedProduct._id}-${selectedOptions[selectedProduct._id]?.size}`
+    ] > 0
+      ? "bg-success text-primarytext hover:opacity-90 cursor-pointer"
+      : "bg-danger text-primarytext cursor-not-allowed"
+  }
+`}
               disabled={
                 stockMap[
                   `${selectedProduct._id}-${
@@ -365,10 +370,10 @@ function ProductCard({ searchQuery, sortBy, size, category }) {
                       ? "text-yellow-400"
                       : "text-gray-300"
                   } hover:text-yellow-400`}
-                  onClick={() => {
-                    if (!hasRated(selectedProduct))
-                      handleStarClick(selectedProduct._id, i + 1);
-                  }}
+                  onClick={() =>
+                    !hasRated(selectedProduct) &&
+                    handleStarClick(selectedProduct._id, i + 1)
+                  }
                 ></i>
               ))}
               <span className="ml-2 text-sm text-primarytext">
