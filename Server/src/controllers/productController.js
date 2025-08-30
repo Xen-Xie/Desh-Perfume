@@ -24,7 +24,7 @@ const uploadToCloudinary = (file) => {
 // Create New Product
 export const createProduct = async (req, res) => {
   try {
-    const { name, price, category, description } = req.body;
+    const { name, price, category, description,ingredients } = req.body;
 
     // Parse sizes from JSON string
     let sizes = [];
@@ -46,6 +46,7 @@ export const createProduct = async (req, res) => {
       description,
       sizes,
       images: uploadedImages,
+      ingredients
     });
     await product.save();
 
@@ -89,7 +90,7 @@ export const updateProduct = async (req, res) => {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    const { name, price, category, sizes, description } = req.body;
+    const { name, price, category, sizes, description,ingredients } = req.body;
 
     // Upload new images if any
     const uploadedImages = [];
@@ -107,6 +108,7 @@ export const updateProduct = async (req, res) => {
     if (category) product.category = category;
     if (sizes) product.sizes = JSON.parse(sizes);
     if (description) product.description = description;
+    if(ingredients) product.ingredients = ingredients;
 
     await product.save();
     res.json(product);
