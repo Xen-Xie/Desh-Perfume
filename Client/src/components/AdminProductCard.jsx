@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Button from "../reuse/Button";
 
@@ -26,9 +26,11 @@ function AdminProductCard() {
       },
     ],
   });
+  const formRef = useRef(null);
 
   const [loading, setLoading] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
+  const [expandedDesc, setExpandedDesc] = useState({});
 
   // Fetch all products from backend API
   const fetchProducts = async () => {
@@ -125,7 +127,9 @@ function AdminProductCard() {
         : await axios.post(
             "https://desh-perfume.onrender.com/api/products",
             data,
-            { headers: { Authorization: `Bearer ${token}` } }
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
           );
 
       // Update products state after edit/add
@@ -199,12 +203,23 @@ function AdminProductCard() {
         existingImage: product.images?.[i]?.imageUrl || null,
       })),
     });
+    if (formRef.current) {
+      formRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   };
+
+  // Group products by category
+  const groupedProducts = products.reduce((acc, product) => {
+    if (!acc[product.category]) acc[product.category] = [];
+    acc[product.category].push(product);
+    return acc;
+  }, {});
 
   return (
     <div className="p-4 font-primary">
       {/* Form */}
       <form
+        ref={formRef}
         className="mb-6 bg-cardbg p-4 rounded shadow-md flex flex-col gap-2"
         onSubmit={handleSubmit}
       >
@@ -355,125 +370,156 @@ function AdminProductCard() {
         </div>
       </form>
 
-      {/* Products Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {products.map((product) => (
-          <div
-            key={product._id}
-            className="bg-cardbg shadow-md rounded-lg overflow-hidden flex flex-col"
-          >
-            <div className="relative overflow-hidden h-48">
-              <div
-                className="flex transition-transform duration-500 ease-in-out h-full"
-                style={{
-                  transform: `translateX(-${
-                    (product.currentImageIndex || 0) * 100
-                  }%)`,
-                }}
-              >
-                {product.images?.map((img, idx) => (
-                  <img
-                    key={img.publicId || idx}
-                    src={img.imageUrl}
-                    alt={product.name}
-                    className="w-full flex-shrink-0 h-48 object-cover"
-                  />
-                ))}
-              </div>
+      {/* PRODUCTS GRID */}
+      <div className="">
+        {/* Grouped Products by category */}
+        {Object.entries(groupedProducts).map(([catName, catProducts]) => (
+          <div key={catName} className="mb-10">
+            <h2 className="text-2xl font-semibold mb-4 text-primarytext">
+              {catName} ({catProducts.length})
+            </h2>
 
-              {/* Previous Button */}
-              {product.images?.length > 1 && (
-                <>
-                  <Button
-                    onClick={() =>
-                      setProducts((prev) =>
-                        prev.map((p) =>
-                          p._id === product._id
-                            ? {
-                                ...p,
-                                currentImageIndex:
-                                  ((p.currentImageIndex || 0) -
-                                    1 +
-                                    p.images.length) %
-                                  p.images.length,
-                              }
-                            : p
-                        )
-                      )
-                    }
-                    className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-primarybg/40 text-primarytext px-2 py-2 rounded"
-                  >
-                    <i className="fa-solid fa-arrow-left"></i>
-                  </Button>
-                  <Button
-                    onClick={() =>
-                      setProducts((prev) =>
-                        prev.map((p) =>
-                          p._id === product._id
-                            ? {
-                                ...p,
-                                currentImageIndex:
-                                  ((p.currentImageIndex || 0) + 1) %
-                                  p.images.length,
-                              }
-                            : p
-                        )
-                      )
-                    }
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primarybg/40 text-primarytext px-2 py-2 rounded"
-                  >
-                    <i className="fa-solid fa-arrow-right"></i>
-                  </Button>
-                </>
-              )}
-
-              {product.soldOut && (
-                <span className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">
-                  Sold Out
-                </span>
-              )}
-            </div>
-
-            <div className="p-4 flex flex-col flex-1">
-              <h2 className="text-lg font-bold text-primarytext text-center">
-                {product.name}
-              </h2>
-              <p className="mt-1 text-sm text-primarytext">
-                {product.category}
-              </p>
-              <p className="mt-1 text-sm text-primarytext">
-                {product.description}
-              </p>
-
-              {/* Stock Indicator */}
-              <div className="mt-2">
-                {product.sizes.map((s, idx) => (
-                  <p
-                    key={idx}
-                    className={`text-xs ${
-                      s.quantity > 0 ? "text-green-600" : "text-red-600"
-                    }`}
-                  >
-                    {s.size}: {s.quantity} in stock (৳{s.price})
-                  </p>
-                ))}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="mt-auto flex gap-2 items-center">
-                <Button
-                  className={`${btnBase} border border-primarytext text-primarytext bg-transparent hover:bg-primarytext/10`}
-                  onClick={() => handleEdit(product)}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {catProducts.map((product) => (
+                <div
+                  key={product._id}
+                  className="bg-cardbg shadow-md rounded-lg overflow-hidden flex flex-col"
                 >
-                  Edit
-                </Button>
-                <Button
-                  className={`${btnBase} bg-danger text-white hover:bg-red-700`}
-                  onClick={() => handleDelete(product._id)}
-                >
-                  Delete
-                </Button>
-              </div>
+                  {/* Product Image Carousel */}
+                  <div className="relative overflow-hidden h-48">
+                    <div
+                      className="flex transition-transform duration-500 ease-in-out h-full"
+                      style={{
+                        transform: `translateX(-${
+                          (product.currentImageIndex || 0) * 100
+                        }%)`,
+                      }}
+                    >
+                      {product.images?.map((img, idx) => (
+                        <img
+                          key={img.publicId || idx}
+                          src={img.imageUrl}
+                          alt={product.name}
+                          className="w-full flex-shrink-0 h-48 object-cover"
+                        />
+                      ))}
+                    </div>
+                    {product.images?.length > 1 && (
+                      <>
+                        <Button
+                          onClick={() =>
+                            setProducts((prev) =>
+                              prev.map((p) =>
+                                p._id === product._id
+                                  ? {
+                                      ...p,
+                                      currentImageIndex:
+                                        ((p.currentImageIndex || 0) -
+                                          1 +
+                                          p.images.length) %
+                                        p.images.length,
+                                    }
+                                  : p
+                              )
+                            )
+                          }
+                          className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-primarybg/40 text-primarytext px-2 py-2 rounded"
+                        >
+                          <i className="fa-solid fa-arrow-left"></i>
+                        </Button>
+                        <Button
+                          onClick={() =>
+                            setProducts((prev) =>
+                              prev.map((p) =>
+                                p._id === product._id
+                                  ? {
+                                      ...p,
+                                      currentImageIndex:
+                                        ((p.currentImageIndex || 0) + 1) %
+                                        p.images.length,
+                                    }
+                                  : p
+                              )
+                            )
+                          }
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primarybg/40 text-primarytext px-2 py-2 rounded"
+                        >
+                          <i className="fa-solid fa-arrow-right"></i>
+                        </Button>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Product Details */}
+                  <div className="p-4 flex flex-col flex-1">
+                    <h2 className="text-lg font-bold text-primarytext text-center">
+                      {product.name}
+                    </h2>
+                    <p className="mt-1 text-sm text-primarytext">
+                      {product.category}
+                    </p>
+
+                    {/* Description toggle */}
+                    <div className="mt-1 text-sm text-primarytext">
+                      {product.description.split(" ").length > 5 ? (
+                        <>
+                          {expandedDesc[product._id]
+                            ? product.description
+                            : product.description
+                                .split(" ")
+                                .slice(0, 5)
+                                .join(" ") + "..."}
+                          <button
+                            className="ml-1 text-primarytext underline text-xs"
+                            onClick={() =>
+                              setExpandedDesc((prev) => ({
+                                ...prev,
+                                [product._id]: !prev[product._id],
+                              }))
+                            }
+                          >
+                            {expandedDesc[product._id]
+                              ? "Read Less"
+                              : "Read More"}
+                          </button>
+                        </>
+                      ) : (
+                        product.description
+                      )}
+                    </div>
+
+                    {/* Stock Indicator */}
+                    <div className="mt-2">
+                      {product.sizes.map((s, idx) => (
+                        <p
+                          key={idx}
+                          className={`text-xs ${
+                            s.quantity > 0 ? "text-green-600" : "text-red-600"
+                          }`}
+                        >
+                          {s.size}: {s.quantity} in stock (৳{s.price})
+                        </p>
+                      ))}
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="mt-auto flex gap-2 items-center">
+                      <Button
+                        className={`${btnBase} border border-primarytext text-primarytext bg-transparent hover:bg-primarytext/10`}
+                        onClick={() => handleEdit(product)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        className={`${btnBase} bg-danger text-white hover:bg-red-700`}
+                        onClick={() => handleDelete(product._id)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         ))}
