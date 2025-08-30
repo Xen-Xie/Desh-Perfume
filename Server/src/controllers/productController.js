@@ -1,43 +1,60 @@
 import Product from "../models/Product.js";
 import cloudinary from "../config/cloudinary.js";
 
+// helper to upload buffer to Cloudinary
+const uploadToCloudinary = (file) => {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader
+      .upload_stream(
+        {
+          folder: "products",
+          public_id: file.hash, // use sha256 hash from middleware
+          overwrite: false, // prevent overwriting duplicates
+          resource_type: "image",
+        },
+        (err, result) => {
+          if (err) reject(err);
+          else resolve(result);
+        }
+      )
+      .end(file.buffer);
+  });
+};
+
 // Create New Product
 export const createProduct = async (req, res) => {
   try {
-    const { name, category, sizes, description } = req.body;
-    const parseSizes = sizes ? JSON.parse(sizes) : [];
+    const { name, price, category, description } = req.body;
 
-    // Assign images to sizes
-    if (req.files && req.files.length > 0) {
-      parseSizes.forEach((s, idx) => {
-        if (req.files[idx]) {
-          s.imageUrl = req.files[idx].path; // temporary path
-        }
-      });
-    }
+    // Parse sizes from JSON string
+    let sizes = [];
+    if (req.body.sizes) sizes = JSON.parse(req.body.sizes);
 
-    // Upload images to Cloudinary
-    for (const [idx, file] of (req.files || []).entries()) {
-      const result = await cloudinary.uploader.upload(file.path, {
-        folder: "products",
+    const uploadedImages = [];
+    for (const file of req.files) {
+      const result = await uploadToCloudinary(file);
+      uploadedImages.push({
+        imageUrl: result.secure_url,
+        publicId: result.public_id,
       });
-      parseSizes[idx].imageUrl = result.secure_url; // assign final URL
     }
 
     const product = new Product({
       name,
+      price,
       category,
-      sizes: parseSizes,
       description,
-      images: parseSizes.map((s) => ({ imageUrl: s.imageUrl, publicId: "" })),
+      sizes,
+      images: uploadedImages,
     });
-
     await product.save();
+
     res.status(201).json(product);
-  } catch (err) {
+  } catch (error) {
+    console.error(error);
     res
-      .status(400)
-      .json({ message: "Error creating product", error: err.message });
+      .status(500)
+      .json({ message: "Error creating product", error: error.message });
   }
 };
 
@@ -69,44 +86,35 @@ export const getProduct = async (req, res) => {
 // Update Product
 export const updateProduct = async (req, res) => {
   try {
-    const { name, category, sizes, description } = req.body;
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    if (name) product.name = name;
-    if (description) product.description = description;
-    if (category) product.category = category;
+    const { name, price, category, sizes, description } = req.body;
 
-    let parseSizes = sizes ? JSON.parse(sizes) : product.sizes;
-
-    // Assign images to sizes
-    if (req.files && req.files.length > 0) {
-      parseSizes.forEach((s, idx) => {
-        if (req.files[idx]) {
-          s.imageUrl = req.files[idx].path; // temporary path
-        }
+    // Upload new images if any
+    const uploadedImages = [];
+    for (const file of req.files) {
+      const result = await uploadToCloudinary(file);
+      uploadedImages.push({
+        imageUrl: result.secure_url,
+        publicId: result.public_id,
       });
-
-      for (const [idx, file] of req.files.entries()) {
-        const result = await cloudinary.uploader.upload(file.path, {
-          folder: "products",
-        });
-        parseSizes[idx].imageUrl = result.secure_url;
-      }
     }
 
-    product.sizes = parseSizes;
-    product.images = parseSizes.map((s) => ({
-      imageUrl: s.imageUrl,
-      publicId: "",
-    }));
+    if (uploadedImages.length > 0) product.images.push(...uploadedImages);
+    if (name) product.name = name;
+    if (price) product.price = price;
+    if (category) product.category = category;
+    if (sizes) product.sizes = JSON.parse(sizes);
+    if (description) product.description = description;
 
     await product.save();
     res.json(product);
-  } catch (err) {
+  } catch (error) {
+    console.error(error);
     res
       .status(500)
-      .json({ message: "Error updating product", error: err.message });
+      .json({ message: "Error updating product", error: error.message });
   }
 };
 
@@ -116,20 +124,23 @@ export const deleteProduct = async (req, res) => {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    // Delete all size images from Cloudinary
+    // Delete all product images from Cloudinary
     await Promise.all(
-      product.sizes.map(async (s) => {
-        if (s.publicId) {
+      product.images.map(async (img) => {
+        if (img.publicId) {
           try {
-            await cloudinary.uploader.destroy(s.publicId);
+            await cloudinary.uploader.destroy(img.publicId);
           } catch (err) {
-            console.error(`Failed to delete image ${s.publicId}:`, err.message);
+            console.error(
+              `Failed to delete image ${img.publicId}:`,
+              err.message
+            );
           }
         }
       })
     );
 
-    // Delete product
+    // Delete product from MongoDB
     await product.deleteOne();
     res.json({ message: "Product and images deleted successfully" });
   } catch (err) {

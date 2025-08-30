@@ -1,7 +1,4 @@
 import express from "express";
-import multer from "multer";
-import { CloudinaryStorage } from "multer-storage-cloudinary";
-import cloudinary from "../config/cloudinary.js";
 import {
   createProduct,
   getProducts,
@@ -13,19 +10,9 @@ import {
   getSizes,
 } from "../controllers/productController.js";
 import { authenticateToken, isAdmin } from "../middlewares/authorization.js";
+import { upload, dedupFiles } from "../middlewares/upload.js";
 
 const router = express.Router();
-
-// Multer + Cloudinary config
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: "products",
-    allowed_formats: ["jpg", "jpeg", "png", "webp"],
-  },
-});
-
-const upload = multer({ storage });
 
 // Routes
 router.get("/", getProducts);
@@ -40,6 +27,7 @@ router.post(
   authenticateToken,
   isAdmin,
   upload.array("images", 10),
+  dedupFiles,
   createProduct
 );
 router.put(
@@ -47,7 +35,9 @@ router.put(
   authenticateToken,
   isAdmin,
   upload.array("images", 10),
+  dedupFiles,
   updateProduct
 );
 router.delete("/:id", authenticateToken, isAdmin, deleteProduct);
+
 export default router;
