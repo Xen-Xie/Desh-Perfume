@@ -116,16 +116,26 @@ export const deleteProduct = async (req, res) => {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    for (const img of product.images) {
-      await cloudinary.uploader.destroy(img.publicId);
-    }
+    // Delete all size images from Cloudinary
+    await Promise.all(
+      product.sizes.map(async (s) => {
+        if (s.publicId) {
+          try {
+            await cloudinary.uploader.destroy(s.publicId);
+          } catch (err) {
+            console.error(`Failed to delete image ${s.publicId}:`, err.message);
+          }
+        }
+      })
+    );
 
+    // Delete product
     await product.deleteOne();
-    res.json({ message: "Product deleted" });
-  } catch (error) {
+    res.json({ message: "Product and images deleted successfully" });
+  } catch (err) {
     res
       .status(500)
-      .json({ message: "Error deleting product", error: error.message });
+      .json({ message: "Error deleting product", error: err.message });
   }
 };
 
