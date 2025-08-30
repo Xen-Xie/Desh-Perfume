@@ -80,3 +80,11 @@
   background: rgba(0,0,0,0.4); /* Slightly darker on hover */
 }
 
+/* index.css or globals.css */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}

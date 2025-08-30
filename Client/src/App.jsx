@@ -9,6 +9,7 @@ import Error from "./pages/Error";
 import ProductPanel from "./pages/ProductPanel";
 import AdminRoute from "./routes/AdminRoute";
 import CheckOut from "./pages/CheckOut";
+import ProductDetails from "./pages/subpages/ProductDetails";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="/store" element={<Store />} />
+          <Route path="/store/product/:id" element={<ProductDetails />} />
           <Route path="/account" element={<Account />} />
           <Route path="/login" element={<Login />} />
           <Route
