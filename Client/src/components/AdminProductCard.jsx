@@ -16,6 +16,7 @@ function AdminProductCard() {
     name: "",
     category: "",
     description: "",
+    ingredients: "",
     sizes: [
       {
         size: "",
@@ -30,7 +31,7 @@ function AdminProductCard() {
 
   const [loading, setLoading] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
-  const [expandedDesc, setExpandedDesc] = useState({});
+  const [expandedIng, setExpandedIng] = useState({});
 
   // Fetch all products from backend API
   const fetchProducts = async () => {
@@ -102,6 +103,7 @@ function AdminProductCard() {
       data.append("name", formData.name);
       data.append("category", formData.category);
       data.append("description", formData.description);
+      data.append("ingredients", formData.ingredients);
 
       // size images mapping
       const sizesWithoutImages = formData.sizes.map((s) => {
@@ -151,6 +153,7 @@ function AdminProductCard() {
         name: "",
         category: "",
         description: "",
+        ingredients: "",
         sizes: [
           {
             size: "",
@@ -195,6 +198,7 @@ function AdminProductCard() {
       name: product.name,
       category: product.category,
       description: product.description,
+      ingredients: product.ingredients,
       sizes: product.sizes.map((s, i) => ({
         size: s.size,
         price: s.price,
@@ -250,6 +254,13 @@ function AdminProductCard() {
           name="description"
           value={formData.description}
           placeholder="Description"
+          onChange={handleInputChange}
+          className="admin-input"
+        />
+        <textarea
+          name="ingredients"
+          value={formData.ingredients}
+          placeholder="Ingredients"
           onChange={handleInputChange}
           className="admin-input"
         />
@@ -461,30 +472,30 @@ function AdminProductCard() {
 
                     {/* Description toggle */}
                     <div className="mt-1 text-sm text-primarytext">
-                      {product.description.split(" ").length > 5 ? (
+                      {product.ingredients.split(" ").length > 5 ? (
                         <>
-                          {expandedDesc[product._id]
-                            ? product.description
-                            : product.description
+                          {expandedIng[product._id]
+                            ? product.ingredients
+                            : product.ingredients
                                 .split(" ")
                                 .slice(0, 5)
                                 .join(" ") + "..."}
                           <button
                             className="ml-1 text-primarytext underline text-xs"
                             onClick={() =>
-                              setExpandedDesc((prev) => ({
+                              setExpandedIng((prev) => ({
                                 ...prev,
                                 [product._id]: !prev[product._id],
                               }))
                             }
                           >
-                            {expandedDesc[product._id]
+                            {expandedIng[product._id]
                               ? "Read Less"
                               : "Read More"}
                           </button>
                         </>
                       ) : (
-                        product.description
+                        product.ingredients
                       )}
                     </div>
 
