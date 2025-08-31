@@ -5,7 +5,7 @@ import Select from "react-select";
 import makeAnimated from "react-select/animated";
 import Button from "../reuse/Button";
 
-function Store({ nameFilter = "" }) {
+function Store({ nameFilter = "", targetCategory }) {
   const [openFilters, setOpenFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("all");
@@ -242,6 +242,7 @@ function Store({ nameFilter = "" }) {
           sortBy={sortBy}
           size={size}
           nameFilter={nameFilter}
+          targetCategory={targetCategory}
         />
       </main>
     </div>
