@@ -7,7 +7,7 @@ import { bangladeshStates } from "../data/BangladeshData";
 import Select from "react-select";
 
 function OrderArea({ selectedAddress, setSelectedAddress }) {
-  const { cartItems, updateQuantity, removeFromCart, totalPrice } = useCart();
+  const { cartItems, updateQuantity, removeFromCart } = useCart();
   const { token } = useAuth();
 
   const [paymentMethod, setPaymentMethod] = useState("COD");
@@ -20,10 +20,19 @@ function OrderArea({ selectedAddress, setSelectedAddress }) {
     setFormData(selectedAddress || {});
     setEditMode(false);
   }, [selectedAddress]);
+  // Compute subtotal considering salePrice
+  const subtotal = cartItems.reduce((acc, item) => {
+    const selectedSize = item.product.sizes.find((s) => s.size === item.size);
+    const price =
+      selectedSize?.isOnSale && selectedSize?.salePrice
+        ? selectedSize.salePrice
+        : selectedSize?.price || 0;
+    return acc + price * item.quantity;
+  }, 0);
 
   const shipping =
     selectedAddress?.state === "Dhaka" ? 0 : cartItems.length > 0 ? 100 : 0;
-  const total = totalPrice + shipping;
+  const total = subtotal + shipping;
 
   // Validate state & city
   const validateAddress = () => {
@@ -124,11 +133,15 @@ function OrderArea({ selectedAddress, setSelectedAddress }) {
       ) : (
         <>
           {/* Cart Items */}
+
           {cartItems.map((item) => {
             const selectedSize = item.product.sizes.find(
               (s) => s.size === item.size
             );
-            const price = selectedSize?.price || 0;
+            const price =
+              selectedSize?.isOnSale && selectedSize?.salePrice
+                ? selectedSize.salePrice
+                : selectedSize?.price || 0;
 
             return (
               <div
@@ -212,7 +225,7 @@ function OrderArea({ selectedAddress, setSelectedAddress }) {
           <div className="mt-4 border-t border-t-primarytext pt-4 flex flex-col gap-2">
             <div className="flex justify-between font-medium text-primarytext">
               <span>Subtotal</span>
-              <span>৳{totalPrice}</span>
+              <span>৳{subtotal}</span>
             </div>
             <div className="flex justify-between text-primarytext">
               <span>
@@ -392,7 +405,7 @@ function OrderArea({ selectedAddress, setSelectedAddress }) {
                     {selectedAddress.state}, {selectedAddress.country} -{" "}
                     {selectedAddress.zipCode}
                   </p>
-                  <p className="mt-2 font-medium">Subtotal: ৳{totalPrice}</p>
+                  <p className="mt-2 font-medium">Subtotal: ৳{subtotal}</p>
                   <p className="font-medium">
                     Shipping: ৳{shipping}{" "}
                     {selectedAddress.state === "Dhaka" && "(Free)"}
