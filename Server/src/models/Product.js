@@ -7,6 +7,8 @@ const sizeSchema = new mongoose.Schema({
   inStock: { type: Boolean, default: true },
   quantity: { type: Number, default: 0 },
   imageUrl: { type: String, default: "" },
+  isOnSale: { type: Boolean, default: false },
+  salePrice: {type: Number, default: ""},
 });
 
 // Image Schema
