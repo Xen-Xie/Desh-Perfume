@@ -24,6 +24,8 @@ function AdminProductCard() {
         quantity: 0,
         image: null,
         existingImage: null,
+        isOnSale: false,
+        salePrice: null,
       },
     ],
   });
@@ -161,6 +163,8 @@ function AdminProductCard() {
             quantity: 0,
             image: null,
             existingImage: null,
+            isOnSale: false,
+            salePrice: null,
           },
         ],
       });
@@ -205,6 +209,8 @@ function AdminProductCard() {
         quantity: s.quantity,
         image: null,
         existingImage: product.images?.[i]?.imageUrl || null,
+        isOnSale: false,
+        salePrice: null,
       })),
     });
     if (formRef.current) {
@@ -299,6 +305,25 @@ function AdminProductCard() {
                 className="border px-2 py-1 rounded w-20 border-primarytext text-primarytext focus:outline-0"
                 required
               />
+              <label className="flex items-center gap-1 text-xs text-primarytext">
+                <input
+                  type="number"
+                  value={s.salePrice || ""}
+                  placeholder="Sale Price"
+                  onChange={(e) =>
+                    handleSizeChange(i, "salePrice", e.target.value)
+                  }
+                  className="border px-2 py-1 rounded w-24 border-primarytext text-primarytext focus:outline-0"
+                />
+                <input
+                  type="checkbox"
+                  checked={s.isOnSale}
+                  onChange={(e) =>
+                    handleSizeChange(i, "isOnSale", e.target.checked)
+                  }
+                />
+                On Sale
+              </label>
 
               {/* Show existing image preview if available */}
               {s.existingImage && !s.image && (
@@ -406,6 +431,19 @@ function AdminProductCard() {
                         }%)`,
                       }}
                     >
+                      {/* BADGES */}
+                      <div className="absolute top-2 left-2 flex flex-col gap-1">
+                        {product.sizes.some((s) => s.isOnSale) && (
+                          <span className="bg-secondarytext text-primarybg text-xs px-2 py-1 rounded">
+                            On Sale
+                          </span>
+                        )}
+                        {product.sizes.every((s) => s.quantity === 0) && (
+                          <span className="bg-danger text-primarybg text-xs px-2 py-1 rounded">
+                            Sold Out
+                          </span>
+                        )}
+                      </div>
                       {product.images?.map((img, idx) => (
                         <img
                           key={img.publicId || idx}
