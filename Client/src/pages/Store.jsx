@@ -70,6 +70,31 @@ function Store({ nameFilter = "", targetCategory }) {
               ]}
               value={{ value: category, label: category }}
               onChange={(selected) => setCategory(selected.value)}
+              menuPortalTarget={null}
+              styles={{
+                option: (provided, state) => ({
+                  ...provided,
+                  cursor: "pointer",
+                  color: state.isSelected ? "#F87171" : "#121212",
+                  backgroundColor: state.isSelected ? "#BBBBBB" : "#EAEAEA",
+                  "&:hover": {
+                    backgroundColor: "#1B263B",
+                    color: "#EAEAEA",
+                  },
+                }),
+                singleValue: (provided) => ({
+                  ...provided,
+                  color: "#121212",
+                }),
+                input: (provided) => ({
+                  ...provided,
+                  color: "#121212",
+                }),
+                menu: (provided) => ({
+                  ...provided,
+                  zIndex: 99,
+                }),
+              }}
             />
           </div>
 
@@ -83,6 +108,31 @@ function Store({ nameFilter = "", targetCategory }) {
               options={[...mapToOptions(sizes, "size")]}
               value={size.map((s) => ({ value: s, label: s }))}
               onChange={(selected) => setSize(selected.map((s) => s.value))}
+              menuPortalTarget={null}
+              styles={{
+                option: (provided, state) => ({
+                  ...provided,
+                  cursor: "pointer",
+                  color: state.isSelected ? "#F87171" : "#121212",
+                  backgroundColor: state.isSelected ? "#BBBBBB" : "#EAEAEA",
+                  "&:hover": {
+                    backgroundColor: "#1B263B",
+                    color: "#EAEAEA",
+                  },
+                }),
+                singleValue: (provided) => ({
+                  ...provided,
+                  color: "#121212",
+                }),
+                input: (provided) => ({
+                  ...provided,
+                  color: "#121212",
+                }),
+                menu: (provided) => ({
+                  ...provided,
+                  zIndex: 99,
+                }),
+              }}
             />
           </div>
 
@@ -97,6 +147,31 @@ function Store({ nameFilter = "", targetCategory }) {
               ]}
               value={{ value: sortBy, label: sortBy || "None" }}
               onChange={(selected) => setSortBy(selected.value)}
+              menuPortalTarget={null}
+              styles={{
+                option: (provided, state) => ({
+                  ...provided,
+                  cursor: "pointer",
+                  color: state.isSelected ? "#F87171" : "#121212",
+                  backgroundColor: state.isSelected ? "#BBBBBB" : "#EAEAEA",
+                  "&:hover": {
+                    backgroundColor: "#1B263B",
+                    color: "#EAEAEA",
+                  },
+                }),
+                singleValue: (provided) => ({
+                  ...provided,
+                  color: "#121212",
+                }),
+                input: (provided) => ({
+                  ...provided,
+                  color: "#121212",
+                }),
+                menu: (provided) => ({
+                  ...provided,
+                  zIndex: 99,
+                }),
+              }}
             />
           </div>
 
@@ -139,6 +214,158 @@ function Store({ nameFilter = "", targetCategory }) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
+
+              {/* Mobile Filters Drawer */}
+              <div
+                className={`fixed inset-0 z-50 flex transition-opacity duration-300 ${
+                  openFilters
+                    ? "opacity-100 pointer-events-auto"
+                    : "opacity-0 pointer-events-none"
+                }`}
+              >
+                {/* Overlay */}
+                <div
+                  className="absolute inset-0 bg-transparent backdrop-blur-md bg-opacity-50 transition-opacity duration-300"
+                  onClick={() => setOpenFilters(false)}
+                />
+
+                {/* Drawer */}
+                <div
+                  className={`relative w-3/4 max-w-xs bg-primarybg p-4 h-full shadow-xl transform transition-transform duration-300 ease-in-out mt-13 ${
+                    openFilters ? "translate-x-0" : "-translate-x-full"
+                  }`}
+                >
+                  <h2 className="text-xl font-semibold mb-4 mt-5">Filters</h2>
+
+                  {/* Category Filter */}
+                  <div className="mb-4">
+                    <label className="block font-medium mb-1">Category</label>
+                    <Select
+                      options={[
+                        { value: "all", label: "All" },
+                        ...mapToOptions(categories, "name"),
+                      ]}
+                      value={{ value: category, label: category }}
+                      onChange={(selected) => setCategory(selected.value)}
+                      menuPortalTarget={null}
+                      styles={{
+                        option: (provided, state) => ({
+                          ...provided,
+                          color: state.isSelected ? "#F87171" : "#121212",
+                          backgroundColor: state.isSelected
+                            ? "#BBBBBB"
+                            : "#EAEAEA",
+                        }),
+                        singleValue: (provided) => ({
+                          ...provided,
+                          color: "#121212",
+                        }),
+                        input: (provided) => ({
+                          ...provided,
+                          color: "#121212",
+                        }),
+                        menu: (provided) => ({
+                          ...provided,
+                          zIndex: 99,
+                        }),
+                      }}
+                    />
+                  </div>
+
+                  {/* Size Filter */}
+                  <div className="mb-4">
+                    <label className="block font-medium mb-1">Size</label>
+                    <Select
+                      closeMenuOnSelect={false}
+                      components={animatedComponents}
+                      isMulti
+                      options={[...mapToOptions(sizes, "size")]}
+                      value={size.map((s) => ({ value: s, label: s }))}
+                      onChange={(selected) =>
+                        setSize(selected.map((s) => s.value))
+                      }
+                      menuPortalTarget={null}
+                      styles={{
+                        option: (provided, state) => ({
+                          ...provided,
+                          color: state.isSelected ? "#F87171" : "#121212",
+                          backgroundColor: state.isSelected
+                            ? "#BBBBBB"
+                            : "#EAEAEA",
+                        }),
+                        singleValue: (provided) => ({
+                          ...provided,
+                          color: "#121212",
+                        }),
+                        input: (provided) => ({
+                          ...provided,
+                          color: "#121212",
+                        }),
+                        menu: (provided) => ({
+                          ...provided,
+                          zIndex: 99,
+                        }),
+                      }}
+                    />
+                  </div>
+
+                  {/* Sort Filter */}
+                  <div className="mb-4">
+                    <label className="block font-medium mb-1">
+                      Sort By Price
+                    </label>
+                    <Select
+                      options={[
+                        { value: "", label: "None" },
+                        { value: "low-to-high", label: "Low to High" },
+                        { value: "high-to-low", label: "High to Low" },
+                      ]}
+                      value={{ value: sortBy, label: sortBy || "None" }}
+                      onChange={(selected) => setSortBy(selected.value)}
+                      menuPortalTarget={null}
+                      styles={{
+                        option: (provided, state) => ({
+                          ...provided,
+                          color: state.isSelected ? "#F87171" : "#121212",
+                          backgroundColor: state.isSelected
+                            ? "#BBBBBB"
+                            : "#EAEAEA",
+                        }),
+                        singleValue: (provided) => ({
+                          ...provided,
+                          color: "#121212",
+                        }),
+                        input: (provided) => ({
+                          ...provided,
+                          color: "#121212",
+                        }),
+                        menu: (provided) => ({
+                          ...provided,
+                          zIndex: 99,
+                        }),
+                      }}
+                    />
+                  </div>
+
+                  <Button
+                    onClick={clearFilters}
+                    className="relative overflow-hidden w-full py-2 border border-primarytext text-primarytext rounded-lg mt-2 bg-transparent group cursor-pointer"
+                  >
+                    <span className="absolute inset-0 bg-primarytext w-0 group-hover:w-full transition-all duration-300 ease-out z-0"></span>
+                    <span className="relative z-10 group-hover:text-primarybg transition-colors duration-300">
+                      Clear Filters
+                    </span>
+                  </Button>
+
+                  {/* Close Button */}
+                  <Button
+                    onClick={() => setOpenFilters(false)}
+                    className="mt-4 w-full py-2 bg-danger text-primarytext rounded-lg"
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
             </div>
 
             {/* Desktop Search Bar */}
