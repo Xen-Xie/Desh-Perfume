@@ -50,7 +50,7 @@ function ProductDetails() {
       }
     };
     fetchProduct();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {
@@ -109,16 +109,20 @@ function ProductDetails() {
       <rect x="0" y="400" rx="5" ry="5" width="80" height="80" />
       <rect x="90" y="400" rx="5" ry="5" width="80" height="80" />
       <rect x="180" y="400" rx="5" ry="5" width="80" height="80" />
-
       {/* Right: Product Info */}
       <rect x="400" y="0" rx="5" ry="5" width="380" height="32" /> {/* Name */}
-      <rect x="400" y="50" rx="5" ry="5" width="180" height="24" /> {/* Category */}
-      <rect x="400" y="90" rx="5" ry="5" width="140" height="32" /> {/* Price */}
-      <rect x="400" y="140" rx="5" ry="5" width="64" height="32" /> {/* Sizes */}
+      <rect x="400" y="50" rx="5" ry="5" width="180" height="24" />{" "}
+      {/* Category */}
+      <rect x="400" y="90" rx="5" ry="5" width="140" height="32" />{" "}
+      {/* Price */}
+      <rect x="400" y="140" rx="5" ry="5" width="64" height="32" />{" "}
+      {/* Sizes */}
       <rect x="470" y="140" rx="5" ry="5" width="64" height="32" />
       <rect x="540" y="140" rx="5" ry="5" width="64" height="32" />
-      <rect x="400" y="190" rx="5" ry="5" width="200" height="24" /> {/* Stock */}
-      <rect x="400" y="230" rx="5" ry="5" width="380" height="48" /> {/* Button */}
+      <rect x="400" y="190" rx="5" ry="5" width="200" height="24" />{" "}
+      {/* Stock */}
+      <rect x="400" y="230" rx="5" ry="5" width="380" height="48" />{" "}
+      {/* Button */}
     </ContentLoader>
   );
 
@@ -133,12 +137,25 @@ function ProductDetails() {
       <div className="grid md:grid-cols-2 gap-8">
         {/* Image Section */}
         <div className="flex flex-col items-center">
-          <div className="w-full mb-3">
+          <div className="w-full mb-3 relative hover:scale-105 shadow-lg transition-transform duration-500">
             <img
               src={selectedImage}
               alt={product.name}
               className="w-full h-full object-contain transition-transform duration-500 hover:scale-105 shadow-lg"
             />
+            {/* BADGES */}
+            <div className="absolute top-2 left-2 flex flex-col gap-1">
+              {product.sizes.some((s) => s.isOnSale) && (
+                <span className="bg-secondarytext text-primarybg text-xs px-2 py-1 rounded">
+                  On Sale
+                </span>
+              )}
+              {product.sizes.every((s) => s.quantity === 0) && (
+                <span className="bg-danger text-primarybg text-xs px-2 py-1 rounded">
+                  Sold Out
+                </span>
+              )}
+            </div>
           </div>
           {/* Thumbnails */}
           <div className="relative w-full mt-4">
@@ -196,11 +213,33 @@ function ProductDetails() {
               </span>
             </p>
 
-            <p className="text-2xl text-primarytext font-semibold mt-4">
-              ৳
-              {product.sizes.find((s) => s.size === selectedSize)?.price ||
-                Math.min(...product.sizes.map((s) => s.price))}
-            </p>
+            <div className="mt-4">
+              {(() => {
+                const selected = product.sizes.find(
+                  (s) => s.size === selectedSize
+                );
+                if (!selected) return null;
+
+                if (selected.isOnSale && selected.salePrice) {
+                  return (
+                    <div className="flex items-center gap-3">
+                      <span className="line-through text-gray-500 text-xl">
+                        ৳ {selected.price}
+                      </span>
+                      <span className="text-red-600 text-2xl font-bold">
+                        ৳ {selected.salePrice}
+                      </span>
+                    </div>
+                  );
+                }
+
+                return (
+                  <span className="text-2xl text-primarytext font-semibold">
+                    ৳ {selected.price}
+                  </span>
+                );
+              })()}
+            </div>
 
             {/* Description */}
             <div className="mt-4 text-primarytext">
