@@ -15,7 +15,7 @@ function HeroCard() {
       image: "/img2.jpg",
       link: "/store/bearddhairandskincare",
     },
-    { title: "DASH ORIGINALS", image: "/img3.jpg", link: "/dashorginals" },
+    { title: "DASH ORIGINALS", image: "/img3.jpg", link: "/store/dashoriginals" },
     {
       title: "FEMALE PERFUME OILS",
       image: "/img4.jpg",
