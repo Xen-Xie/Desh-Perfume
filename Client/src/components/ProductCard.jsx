@@ -159,8 +159,29 @@ function ProductCard({
                     </div>
                     <div className="p-3 flex flex-col justify-between flex-1">
                       <div className="text-center">
-                        <h2 className="text-lg font-bold">{product.name}</h2>
-                        <p className="font-semibold mt-1">৳ {currentPrice}</p>
+                        <h2 className="text-lg font-semibold leading-[21px]">
+                          {product.name}
+                        </h2>
+                        {/* PRICE DISPLAY */}
+                        {product.sizes.some((s) => s.isOnSale) ? (
+                          <>
+                            {/* Original Price (crossed out with pencil sketch style) */}
+                            <p className="text-primarytext line-through decoration-[2px] decoration-danger">
+                              ৳ {Math.min(...product.sizes.map((s) => s.price))}
+                            </p>
+                            {/* On Sale Price */}
+                            <p className="text-danger font-bold mt-1">
+                              ৳{" "}
+                              {Math.min(
+                                ...product.sizes
+                                  .filter((s) => s.isOnSale)
+                                  .map((s) => s.salePrice)
+                              )}
+                            </p>
+                          </>
+                        ) : (
+                          <p className="font-semibold mt-1">৳ {currentPrice}</p>
+                        )}
                       </div>
                       <Button
                         onClick={() =>
