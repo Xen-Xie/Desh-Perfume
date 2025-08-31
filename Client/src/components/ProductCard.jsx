@@ -133,7 +133,7 @@ function ProductCard({
                 return (
                   <div
                     key={product._id}
-                    className="bg-cardbg shadow-md rounded-lg overflow-hidden flex flex-col justify-between h-full cursor-pointer"
+                    className="bg-cardbg shadow-md rounded-lg overflow-hidden flex flex-col justify-between h-full cursor-pointer relative"
                   >
                     <img
                       src={
@@ -144,6 +144,19 @@ function ProductCard({
                       alt={product.name}
                       className="w-full h-48 object-cover"
                     />
+                    {/* BADGES */}
+                    <div className="absolute top-2 left-2 flex flex-col gap-1">
+                      {product.sizes.some((s) => s.isOnSale) && (
+                        <span className="bg-secondarytext text-primarybg text-xs px-2 py-1 rounded">
+                          On Sale
+                        </span>
+                      )}
+                      {product.sizes.every((s) => s.quantity === 0) && (
+                        <span className="bg-danger text-primarybg text-xs px-2 py-1 rounded">
+                          Sold Out
+                        </span>
+                      )}
+                    </div>
                     <div className="p-3 flex flex-col justify-between flex-1">
                       <div className="text-center">
                         <h2 className="text-lg font-bold">{product.name}</h2>
