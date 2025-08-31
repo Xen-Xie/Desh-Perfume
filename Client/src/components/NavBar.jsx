@@ -200,7 +200,7 @@ function NavBar() {
               className="md:hidden"
             >
               <i
-                className={`fa-solid ${
+                className={`fa-solid text-primarytext ${
                   open ? "fa-xmark" : "fa-bars"
                 } text-2xl mt-[6px]`}
               ></i>
