@@ -27,7 +27,7 @@ function HeroCard() {
       image: "/img6.jpg",
       link: "/store/malperfumeoils",
     },
-    { title: "MEN'S JEWELRY", image: "/img7.png", link: "/mensjewelry" },
+    { title: "MEN'S JEWELRY", image: "/img7.png", link: "/store/mensjewellery" },
     { title: "PERFUME COMBO", image: "/img8.jpg", link: "/store/perfumecombo" },
   ]);
 
