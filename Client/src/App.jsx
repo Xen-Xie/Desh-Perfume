@@ -14,6 +14,7 @@ import AllPerfumeOilsCollections from "./pages/subpages/AllPerfumeOilsCollection
 import MalePerfumeOils from "./pages/subpages/MalePerfumeOils";
 import FemalePerfumeOils from "./pages/subpages/FemalePerfumeOils";
 import BearedHairSkinCare from "./pages/subpages/BearedHairSkinCare";
+import PerfumeCombo from "./pages/subpages/PerfumeCombo";
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
           <Route path="/store/malperfumeoils" element={<MalePerfumeOils />} />
           <Route path="/store/femaleperfumeoils" element={<FemalePerfumeOils />} />
           <Route path="/store/brandhairandskincare" element={<BearedHairSkinCare />} />
+          <Route path="/store/perfumecombo" element={<PerfumeCombo />} />
 
 
           <Route path="*" element={<Error />} />
