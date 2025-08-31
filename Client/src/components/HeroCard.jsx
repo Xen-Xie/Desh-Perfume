@@ -13,7 +13,7 @@ function HeroCard() {
     {
       title: "BEARD, HAIR & SKIN CARE",
       image: "/img2.jpg",
-      link: "/beardhairandskincare",
+      link: "/store/bearddhairandskincare",
     },
     { title: "DASH ORIGINALS", image: "/img3.jpg", link: "/dashorginals" },
     {

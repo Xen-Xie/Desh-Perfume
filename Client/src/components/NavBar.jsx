@@ -22,7 +22,7 @@ function NavBar() {
         { name: "Female Perfume Oils", path: "/store/femaleperfumeoils" },
         { name: "Men's Jewellery", path: "/mensjewellery" },
         { name: "Ladies' Jewellery", path: "/ladiesjewellery" },
-        { name: "Brand Hair and Skin Care", path: "/store/brandhairandskincare" },
+        { name: "Beard Hair and Skin Care", path: "/store/bearddhairandskincare" },
       ],
     },
     { name: "Account", path: "/account" },
