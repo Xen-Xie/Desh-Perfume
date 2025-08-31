@@ -17,6 +17,7 @@ import BearedHairSkinCare from "./pages/subpages/BearedHairSkinCare";
 import PerfumeCombo from "./pages/subpages/PerfumeCombo";
 import MensJwewlry from "./pages/subpages/MensJwewlry";
 import DashOriginals from "./pages/subpages/DashOriginals";
+import LadiesJewelry from "./pages/subpages/LadiesJewelry";
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
           <Route path="/store/perfumecombo" element={<PerfumeCombo />} />
           <Route path="/store/mensjewellery" element={<MensJwewlry />} />
           <Route path="/store/dashoriginals" element={<DashOriginals />} />
+          <Route path="/store/ladiesjewellery" element={<LadiesJewelry />} />
 
 
           <Route path="*" element={<Error />} />

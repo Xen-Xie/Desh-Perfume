@@ -21,7 +21,7 @@ function HeroCard() {
       image: "/img4.jpg",
       link: "/store/femaleperfumeoils",
     },
-    { title: "LADIES' JEWELRY", image: "/img5.jpg", link: "/ladieslewelry" },
+    { title: "LADIES' JEWELRY", image: "/img5.jpg", link: "/store/ladiesjewellery" },
     {
       title: "MALE PERFUME OILS",
       image: "/img6.jpg",
