@@ -12,6 +12,7 @@ import CheckOut from "./pages/CheckOut";
 import ProductDetails from "./pages/subpages/ProductDetails";
 import AllPerfumeOilsCollections from "./pages/subpages/AllPerfumeOilsCollections";
 import MalePerfumeOils from "./pages/subpages/MalePerfumeOils";
+import FemalePerfumeOils from "./pages/subpages/FemalePerfumeOils";
 
 function App() {
   return (
@@ -34,6 +35,8 @@ function App() {
           <Route path="/checkout" element={<CheckOut />} />
           <Route path="/store/allperfumeoils" element={<AllPerfumeOilsCollections />} />
           <Route path="/store/malperfumeoils" element={<MalePerfumeOils />} />
+          <Route path="/store/femaleperfumeoils" element={<FemalePerfumeOils />} />
+
           <Route path="*" element={<Error />} />
         </Route>
       </Routes>

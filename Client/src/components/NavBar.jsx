@@ -19,7 +19,7 @@ function NavBar() {
           path: "/store/allperfumeoils",
         },
         { name: "Male Perfume Oils", path: "/store/malperfumeoils" },
-        { name: "Female Perfume Oils", path: "/femaleperfumeoils" },
+        { name: "Female Perfume Oils", path: "/store/femaleperfumeoils" },
         { name: "Men's Jewellery", path: "/mensjewellery" },
         { name: "Ladies' Jewellery", path: "/ladiesjewellery" },
         { name: "Brand Hair and Skin Care", path: "/brandhairandskincare" },
