@@ -4,7 +4,7 @@ import axios from "axios";
 import Button from "../reuse/Button";
 import ContentLoader from "react-content-loader";
 
-function ProductCard({ searchQuery, sortBy, size, category }) {
+function ProductCard({ searchQuery, sortBy, size, category, nameFilter }) {
   const navigateTo = useNavigate();
 
   const [products, setProducts] = useState([]);
@@ -42,6 +42,10 @@ function ProductCard({ searchQuery, sortBy, size, category }) {
   // Filter, sort, group
   const filteredProducts = products
     .filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    // extra filter for perfume/oil collection
+    .filter((p) =>
+      nameFilter ? new RegExp(nameFilter, "i").test(p.name) : true
+    )
     .filter((p) => (category === "all" ? true : p.category === category))
     .filter((p) =>
       size.length === 0

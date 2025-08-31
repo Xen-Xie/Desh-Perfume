@@ -10,6 +10,7 @@ import ProductPanel from "./pages/ProductPanel";
 import AdminRoute from "./routes/AdminRoute";
 import CheckOut from "./pages/CheckOut";
 import ProductDetails from "./pages/subpages/ProductDetails";
+import AllPerfumeOilsCollections from "./pages/subpages/AllPerfumeOilsCollections";
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
             }
           />
           <Route path="/checkout" element={<CheckOut />} />
+          <Route path="/store/allperfumeoils" element={<AllPerfumeOilsCollections />} />
           <Route path="*" element={<Error />} />
         </Route>
       </Routes>

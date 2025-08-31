@@ -16,7 +16,7 @@ function NavBar() {
       subItems: [
         {
           name: "All Perfume Oil Collections",
-          path: "/allperfumeoilcollections",
+          path: "/store/allperfumeoils",
         },
         { name: "Male Perfume Oils", path: "/malperfumeoils" },
         { name: "Female Perfume Oils", path: "/femaleperfumeoils" },
