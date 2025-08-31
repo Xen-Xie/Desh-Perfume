@@ -3,10 +3,21 @@ import { motion } from "framer-motion";
 import { Link } from "react-router";
 import { cn } from "../config/cn";
 
-const Button = ({ to, children, onClick, className, type = "button" }) => {
+const Button = ({
+  to,
+  children,
+  onClick,
+  className,
+  type = "button",
+  disabled,
+}) => {
   const content = (
     <motion.button
-      onClick={onClick}
+      onClick={(e) => {
+        if (disabled) return;
+        onClick && onClick(e);
+      }}
+      disabled={disabled}
       whileTap={{ scale: 0.95 }}
       className={cn(
         "relative flex justify-center text-center overflow-hidden bg-accentone px-8 py-3 rounded-full font-medium group shadow-lg hover:shadow-xl transition-shadow,transform duration-300 font-primary text-cardbg",
