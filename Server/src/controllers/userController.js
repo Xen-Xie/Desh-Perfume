@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 // Signup a new user
 export const Signup = async (req, res) => {
@@ -28,6 +29,7 @@ export const Signup = async (req, res) => {
     const token = jwt.sign(
       {
         id: newUser._id,
+        name: newUser.name,
         email: newUser.email,
         role: newUser.role,
         isAdmin: newUser.isAdmin,
@@ -70,6 +72,7 @@ export const Login = async (req, res) => {
     const token = jwt.sign(
       {
         id: user._id,
+        name: user.name,
         email: user.email,
         role: user.role,
         isAdmin: user.isAdmin,
