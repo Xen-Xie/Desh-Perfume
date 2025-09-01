@@ -8,8 +8,7 @@ import Select from "react-select";
 
 function OrderArea({ selectedAddress, setSelectedAddress }) {
   const { cartItems, updateQuantity, removeFromCart } = useCart();
-  const { token } = useAuth();
-
+  const { token, user } = useAuth();
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState(selectedAddress || {});
@@ -61,7 +60,7 @@ function OrderArea({ selectedAddress, setSelectedAddress }) {
         phoneNumber: formData.phoneNumber,
       };
       const res = await axios.patch(
-        `http://localhost:5000/api/address/update/${formData._id}`,
+        `https://desh-perfume.onrender.com/api/address/update/${formData._id}`,
         updatedFields,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -82,7 +81,7 @@ function OrderArea({ selectedAddress, setSelectedAddress }) {
     try {
       setLoading(true);
       await axios.delete(
-        `http://localhost:5000/api/address/delete/${selectedAddress._id}`,
+        `https://desh-perfume.onrender.com/api/address/delete/${selectedAddress._id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setSelectedAddress(null);
@@ -395,7 +394,7 @@ function OrderArea({ selectedAddress, setSelectedAddress }) {
               ) : (
                 <div className="space-y-1">
                   <p>
-                    <strong>Name:</strong> {selectedAddress.name || "N/A"}
+                    <strong>Name:</strong> {user.name || "N/A"}
                   </p>
                   <p>
                     <strong>Phone:</strong> {selectedAddress.phoneNumber}

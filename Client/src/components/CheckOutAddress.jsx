@@ -39,7 +39,7 @@ function CheckOutAddress() {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/address/add",
+        "https://desh-perfume.onrender.com/api/address/add",
         address,
         {
           headers: {

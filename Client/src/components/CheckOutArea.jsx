@@ -12,7 +12,7 @@ function CheckOutArea() {
   useEffect(() => {
     const fetchAddress = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/address/get", {
+        const res = await axios.get("https://desh-perfume.onrender.com/api/address/get", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.data) {
